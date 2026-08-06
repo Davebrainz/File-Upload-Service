@@ -1,0 +1,16 @@
+{
+  "users": [
+    {
+      "email": "tester@example.com",
+      "passwordHash": "a24c98981012c5c8c13a81d510841d26:aed082cf4dc1d3c264a8c57d351bf7f27fe30681ed752d513270be42f89fdfbbce67411181e5fccee12af78e4a1b62b31e51aaf8a84354477cc3bc67658d6ed3",
+      "username": "coolname",
+      "createdAt": "2026-08-06T22:56:14.196Z"
+    },
+    {
+      "email": "ogbodudavid51@gmail.com",
+      "passwordHash": "aaca5195ec972ba5eea92a0559ff2b7d:460ceebc5d760de8417f6f405bc16d91c3882105cdbbaaac95529b1f74d652db85154e87d466f96c692b58c3aec462e028680e4e757939afa853bf0d2627c28b",
+      "username": "DAVEBRAINZ",
+      "createdAt": "2026-08-06T22:59:16.263Z"
+    }
+  ]
+}

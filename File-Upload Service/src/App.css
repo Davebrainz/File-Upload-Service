@@ -1,0 +1,300 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #f8fafc;
+  background: linear-gradient(135deg, #0f172a, #1d4ed8);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f172a, #1d4ed8);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.page-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 3rem 1rem; /* CHANGED: more padding top/bottom */
+}
+
+/* REMOVED: .hero-card and .hero-copy completely */
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #bfdbfe;
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+}
+
+h1 {
+  margin: 0 0 0.75rem;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+}
+
+.upload-card {
+  width: 100%; /* CHANGED: was grid column */
+  max-width: 48rem; /* CHANGED: was 940px, now bigger card */
+  background: rgba(15, 23, 42, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  padding: 3rem 2.5rem; /* CHANGED: was 1.5rem, more spacing */
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.3);
+  position: relative;
+  left: 135px;
+  padding-top: 4.5rem;
+}
+
+.auth-form,
+.auth-welcome {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem; /* CHANGED: was 0.75rem, more space between inputs */
+}
+
+.topbar {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  left: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  z-index: 2;
+  align-items: center;
+}
+
+.topbar-btn {
+  width: 100%;
+  max-width: 140px;
+  min-width: 120px;
+  margin-top: 0;
+  padding: 0.9rem 1rem;
+}
+
+.auth-welcome {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1;
+}
+
+.tab-bar {
+  display: flex;
+  justify-content: center; /* NEW: centers the tabs */
+  align-items: center;
+  gap: 0.75rem; /* CHANGED: was 0.5rem */
+  margin: 3rem 0 1.5rem; /* CHANGED: more margin */
+}
+
+.tab-btn {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(15, 23, 42, 0.7);
+  color: #f8fafc;
+  border-radius: 999px;
+  padding: 0.65rem 1.4rem; /* CHANGED: wider buttons */
+  cursor: pointer;
+  font-weight: 600; /* NEW */
+  transition: all 160ms ease; /* NEW */
+}
+
+.tab-btn.active {
+  background: #38bdf8;
+  color: #082f49;
+  font-weight: 700;
+  transform: scale(1.05); /* NEW: slight pop */
+}
+
+.auth-header h2,
+.auth-welcome h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.auth-header p,
+.auth-welcome p {
+  margin: 0;
+  color: #cbd5e1;
+}
+
+.field-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #bfdbfe;
+}
+
+.auth-form input {
+  width: 100%;
+  padding: 0.9rem 1rem; /* CHANGED: bigger inputs */
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: #020617;
+  color: #f8fafc;
+}
+
+.upload-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem; /* CHANGED: was 0.4rem */
+  border: 2px dashed #60a5fa;
+  border-radius: 18px;
+  padding: 2.5rem 1.4rem; /* CHANGED: was 1.4rem, taller dropzone */
+  background: rgba(59, 130, 246, 0.14);
+  cursor: pointer;
+}
+
+.upload-box input {
+  display: none;
+}
+
+.upload-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.upload-subtitle {
+  color: #cbd5e1;
+  font-size: 0.95rem;
+}
+
+.selection-meta {
+  margin: 1.25rem 0; /* CHANGED: was 1rem */
+  color: #bfdbfe;
+}
+
+.primary-btn,
+.secondary-btn {
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  padding: 1rem 1.2rem; /* CHANGED: bigger buttons */
+  cursor: pointer;
+  transition: transform 160ms ease;
+}
+
+.primary-btn:hover,
+.secondary-btn:hover {
+  transform: translateY(-1px);
+}
+
+.primary-btn {
+  background: #38bdf8;
+  color: #082f49;
+  font-weight: 700;
+}
+
+.secondary-btn {
+  background: #1e293b;
+  color: #f8fafc;
+  margin-top: 0.7rem;
+}
+
+.primary-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.status-message {
+  margin-top: 1.25rem; /* CHANGED: was 0.9rem */
+  padding: 1rem 1.2rem; /* CHANGED: bigger */
+  border-radius: 12px;
+  background: rgba(148, 163, 184, 0.2);
+}
+
+.status-message.info {
+  background: rgba(56, 189, 248, 0.16);
+  color: #e0f2fe;
+}
+
+.status-message.error {
+  background: rgba(248, 113, 113, 0.16);
+  color: #fecaca;
+}
+
+.status-message.success {
+  background: rgba(74, 222, 128, 0.16);
+  color: #dcfce7;
+}
+
+.share-box {
+  margin-top: 1.25rem; /* CHANGED: was 1rem */
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem; /* CHANGED: was 0.5rem */
+}
+
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem; /* CHANGED: was 0.6rem */
+}
+
+.action-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.9rem 1rem; /* CHANGED: bigger */
+  border-radius: 12px;
+  background: rgba(56, 189, 248, 0.16);
+  color: #e0f2fe;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.preview-frame {
+  margin-top: 1rem; /* CHANGED: was 0.5rem */
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(2, 6, 23, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 220px;
+}
+
+.preview-image {
+  width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  display: block;
+}
+
+.preview-iframe {
+  width: 100%;
+  min-height: 320px;
+  border: 0;
+  background: #fff;
+}
+
+.share-box input {
+  padding: 0.9rem 1rem; /* CHANGED: bigger */
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: #020617;
+  color: #f8fafc;
+}
+
+@media (max-width: 780px) {
+  .upload-card {
+    padding: 2rem 1.5rem; /* CHANGED: responsive padding */
+  }
+  
+  .tab-bar {
+    margin: 2rem 0 1rem;
+  }
+}
