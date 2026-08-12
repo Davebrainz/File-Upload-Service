@@ -11,10 +11,18 @@
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  min-height: 100vh;
+}
+
 body {
   margin: 0;
-  min-height: 100vh;
   background: #F6F1E6; /* cream background (soft, not pure white) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 button,
@@ -47,13 +55,12 @@ h1 {
 .upload-card {
   width: 100%; /* CHANGED: was grid column */
   max-width: 48rem; /* CHANGED: was 940px, now bigger card */
+  margin: 0 auto;
   background: rgba(15, 23, 42, 0.86);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 24px;
   padding: 3rem 2.5rem; /* CHANGED: was 1.5rem, more spacing */
   box-shadow: 0 24px 60px rgba(15, 23, 42, 0.3);
-  position: relative;
-  left: 135px;
   padding-top: 4.5rem;
 }
 

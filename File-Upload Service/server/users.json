@@ -11,6 +11,12 @@
       "passwordHash": "aaca5195ec972ba5eea92a0559ff2b7d:460ceebc5d760de8417f6f405bc16d91c3882105cdbbaaac95529b1f74d652db85154e87d466f96c692b58c3aec462e028680e4e757939afa853bf0d2627c28b",
       "username": "DAVEBRAINZ",
       "createdAt": "2026-08-06T22:59:16.263Z"
+    },
+    {
+      "email": "testing@gmail.com",
+      "passwordHash": "82403b5cbe94da8685999268a1b260cb:1e1ba9759f73d3aec5b036891c50462a2fd60d8fded3dce78f6398a5971b5598c50bbabd30adb806f2238aba60a930dcc6aa21bca7881373fa03648e0a313a86",
+      "username": "testing",
+      "createdAt": "2026-08-12T19:06:59.717Z"
     }
   ]
 }

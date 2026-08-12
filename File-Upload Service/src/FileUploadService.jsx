@@ -243,7 +243,7 @@ export default function FileUploadService() {
                 type="text"
                 value={authState.username}
                 onChange={(event) => setAuthState((prev) => ({...prev, username: event.target.value }))}
-                placeholder="Choose a username"
+                placeholder="Input username"
               />
 
               <button type="submit" className="primary-btn" disabled={authState.loading}>
