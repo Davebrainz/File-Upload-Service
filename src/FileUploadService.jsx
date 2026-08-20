@@ -75,7 +75,7 @@ export default function FileUploadService() {
     }
 
     setState({
-     ...initialState,
+   ...initialState,
       selectedFile: file,
       uploadState: 'ready',
       fileMeta: {
@@ -92,7 +92,7 @@ export default function FileUploadService() {
     event.preventDefault();
 
     if (!authState.email ||!authState.password) {
-      setAuthState((prev) => ({...prev, message: 'Please enter both email and password.' }));
+      setAuthState((prev) => ({...prev, message: 'Please enter both email/username and password.' }));
       return;
     }
 
@@ -101,13 +101,13 @@ export default function FileUploadService() {
     try {
       const result = await submitAuthRequest({
         mode: authState.mode,
-        email: authState.email,
+        email: authState.email, // this field now accepts email OR username for signin
         password: authState.password,
         username: authState.username,
       });
 
       setAuthState((prev) => ({
-       ...prev,
+     ...prev,
         loading: false,
         message: result.payload.message || 'Success.',
         isAuthenticated: true,
@@ -121,7 +121,7 @@ export default function FileUploadService() {
       }
     } catch (error) {
       setAuthState((prev) => ({
-       ...prev,
+     ...prev,
         loading: false,
         message: error.message || 'Authentication failed.',
       }));
@@ -151,7 +151,7 @@ export default function FileUploadService() {
       }
 
       setAuthState((prev) => ({
-       ...prev,
+     ...prev,
         loading: false,
         message: payload.message || 'Username saved.',
         username: payload.user?.username || prev.username,
@@ -159,7 +159,7 @@ export default function FileUploadService() {
       }));
     } catch (error) {
       setAuthState((prev) => ({
-       ...prev,
+     ...prev,
         loading: false,
         message: error.message || 'Could not save the username.',
       }));
@@ -192,7 +192,7 @@ export default function FileUploadService() {
       const shareUrl = payload.url || buildShareUrl(buildApiUrl('/share'), payload.id || 'unknown');
 
       setState((prev) => ({
-       ...prev,
+     ...prev,
         uploadState: 'success',
         message: 'Upload complete. Share this link securely.',
         shareUrl,
@@ -200,7 +200,7 @@ export default function FileUploadService() {
       }));
     } catch (error) {
       setState((prev) => ({
-       ...prev,
+     ...prev,
         uploadState: 'error',
         message: error.message || 'Upload failed. Please try again.',
       }));
@@ -208,10 +208,10 @@ export default function FileUploadService() {
   };
 
   return (
-    // CHANGED: Full width centered layout + more spacing
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 to-blue-600 flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-2xl">
-        <div className="upload-card bg-black/30 backdrop-blur-lg rounded-2xl p-8 md:p-12 space-y-6 shadow-2xl">
+    // CHANGED: made container fatter - max-w-3xl and more padding
+    <div className="min-h-screen bg-linear-to-br from-blue-900 to-blue-600 flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-3xl">
+        <div className="upload-card bg-black/30 backdrop-blur-lg rounded-2xl p-10 md:p-14 space-y-6 shadow-2xl">
           {!authState.isAuthenticated? (
             <form className="auth-form" onSubmit={handleAuthSubmit}>
               <div className="auth-header">
@@ -219,32 +219,58 @@ export default function FileUploadService() {
                 <p>{authState.mode === 'signup'? 'Create an account to get started.' : 'Welcome back. Sign in to continue.'}</p>
               </div>
 
-              <label className="field-label" htmlFor="email">Email</label>
-              <input
-                id="email"
-                type="email"
-                value={authState.email}
-                onChange={(event) => setAuthState((prev) => ({...prev, email: event.target.value }))}
-                placeholder="you@example.com"
-              />
+              {authState.mode === 'signup'? (
+                // SIGN UP: Email -> Username -> Password
+                <>
+                  <label className="field-label" htmlFor="email">Email</label>
+                  <input
+                    id="email"
+                    type="email"
+                    value={authState.email}
+                    onChange={(event) => setAuthState((prev) => ({...prev, email: event.target.value }))}
+                    placeholder="you@example.com"
+                  />
 
-              <label className="field-label" htmlFor="password">Password</label>
-              <input
-                id="password"
-                type="password"
-                value={authState.password}
-                onChange={(event) => setAuthState((prev) => ({...prev, password: event.target.value }))}
-                placeholder="Enter password"
-              />
+                  <label className="field-label" htmlFor="username">Username</label>
+                  <input
+                    id="username"
+                    type="text"
+                    value={authState.username}
+                    onChange={(event) => setAuthState((prev) => ({...prev, username: event.target.value }))}
+                    placeholder="Input username"
+                  />
 
-              <label className="field-label" htmlFor="username">Username</label>
-              <input
-                id="username"
-                type="text"
-                value={authState.username}
-                onChange={(event) => setAuthState((prev) => ({...prev, username: event.target.value }))}
-                placeholder="Input username"
-              />
+                  <label className="field-label" htmlFor="password">Password</label>
+                  <input
+                    id="password"
+                    type="password"
+                    value={authState.password}
+                    onChange={(event) => setAuthState((prev) => ({...prev, password: event.target.value }))}
+                    placeholder="Enter password"
+                  />
+                </>
+              ) : (
+                // SIGN IN: Only Email/Username + Password
+                <>
+                  <label className="field-label" htmlFor="email">Email or Username</label>
+                  <input
+                    id="email"
+                    type="text"
+                    value={authState.email}
+                    onChange={(event) => setAuthState((prev) => ({...prev, email: event.target.value }))}
+                    placeholder="Enter Email or Username"
+                  />
+
+                  <label className="field-label" htmlFor="password">Password</label>
+                  <input
+                    id="password"
+                    type="password"
+                    value={authState.password}
+                    onChange={(event) => setAuthState((prev) => ({...prev, password: event.target.value }))}
+                    placeholder="Enter password"
+                  />
+                </>
+              )}
 
               <button type="submit" className="primary-btn" disabled={authState.loading}>
                 {authState.loading? 'Please wait...' : authState.mode === 'signup'? 'Sign up' : 'Sign in'}
@@ -254,7 +280,7 @@ export default function FileUploadService() {
                 type="button"
                 className="secondary-btn"
                 onClick={() => setAuthState((prev) => ({
-                 ...prev,
+               ...prev,
                   mode: prev.mode === 'signup'? 'signin' : 'signup',
                   message: prev.mode === 'signup'? 'Use your saved account to sign in.' : 'Create a new account.'
                 }))}

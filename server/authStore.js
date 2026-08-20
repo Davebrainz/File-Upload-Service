@@ -49,13 +49,20 @@ export function getAuthStatus() {
 }
 
 export function saveUser(email, password, username = '') {
-  const normalizedEmail = email.trim().toLowerCase();
+  const normalizedEmail = (email || '').trim().toLowerCase();
   const normalizedUsername = (username || '').trim();
   const users = readUsers();
 
   const existingUser = users.find((user) => user.email === normalizedEmail);
   if (existingUser) {
     return { success: false, error: 'This email already has an account.' };
+  }
+
+  if (normalizedUsername) {
+    const usernameTaken = users.some((user) => user.username && user.username.toLowerCase() === normalizedUsername.toLowerCase());
+    if (usernameTaken) {
+      return { success: false, error: 'This username is already taken.' };
+    }
   }
 
   users.push({
@@ -69,13 +76,18 @@ export function saveUser(email, password, username = '') {
   return { success: true };
 }
 
-export function authenticateUser(email, password) {
-  const normalizedEmail = email.trim().toLowerCase();
+export function authenticateUser(identifier, password) {
+  const normalizedIdentifier = String(identifier || '').trim();
+  const lookupKey = normalizedIdentifier.toLowerCase();
   const users = readUsers();
-  const user = users.find((entry) => entry.email === normalizedEmail);
+  const user = users.find((entry) => {
+    const matchesEmail = entry.email === lookupKey;
+    const matchesUsername = typeof entry.username === 'string' && entry.username.trim() && entry.username.toLowerCase() === lookupKey;
+    return matchesEmail || matchesUsername;
+  });
 
   if (!user) {
-    return { success: false, error: 'No account was found for that email.' };
+    return { success: false, error: 'No account was found for that email or username.' };
   }
 
   if (!verifyPassword(password, user.passwordHash)) {
@@ -86,13 +98,24 @@ export function authenticateUser(email, password) {
 }
 
 export function updateUserUsername(email, username) {
-  const normalizedEmail = email.trim().toLowerCase();
+  const normalizedEmail = (email || '').trim().toLowerCase();
   const normalizedUsername = (username || '').trim();
   const users = readUsers();
   const user = users.find((entry) => entry.email === normalizedEmail);
 
   if (!user) {
     return { success: false, error: 'No account was found for that email.' };
+  }
+
+  const usernameTakenByOtherUser = users.some((entry) => {
+    if (entry.email === normalizedEmail) {
+      return false;
+    }
+    return typeof entry.username === 'string' && entry.username.trim() && entry.username.toLowerCase() === normalizedUsername.toLowerCase();
+  });
+
+  if (usernameTakenByOtherUser) {
+    return { success: false, error: 'This username is already taken.' };
   }
 
   user.username = normalizedUsername;

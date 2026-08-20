@@ -2,9 +2,9 @@
   color-scheme: light;
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   line-height: 1.5;
-  font-weight: 400;
+  font-weight: 500;
   color: #677db1;
-  background: #F6F1E6; /* cream background (soft, not pure white) */
+  background: transparent; /* cream background (soft, not pure white) */
 }
 
 * {
@@ -19,7 +19,9 @@ body,
 
 body {
   margin: 0;
-  background: #F6F1E6; /* cream background (soft, not pure white) */
+  background-image: url('person-playing-3d-video-games-device.jpg');
+  background-size: cover;
+  background-position: center;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -53,13 +55,13 @@ h1 {
 }
 
 .upload-card {
-  width: 100%; /* CHANGED: was grid column */
-  max-width: 48rem; /* CHANGED: was 940px, now bigger card */
+  width: 100%; 
+  max-width: 64rem; /* CHANGED: was 56rem, now even fatter */
   margin: 0 auto;
   background: rgba(15, 23, 42, 0.86);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 24px;
-  padding: 3rem 2.5rem; /* CHANGED: was 1.5rem, more spacing */
+  padding: 3rem 3.5rem; /* CHANGED: was 3rem 3rem, more horizontal space */
   box-shadow: 0 24px 60px rgba(15, 23, 42, 0.3);
   padding-top: 4.5rem;
 }

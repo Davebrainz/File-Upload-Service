@@ -63,13 +63,14 @@ export function createApp() {
   });
 
   app.post('/api/auth/signin', (req, res) => {
-    const { email, password } = req.body || {};
-    if (!email || !password) {
-      res.status(400).json({ error: 'Email and password are required.' });
+    const { email, username, password } = req.body || {};
+    const identifier = email || username;
+    if (!identifier || !password) {
+      res.status(400).json({ error: 'Email or username and password are required.' });
       return;
     }
 
-    const result = authenticateUser(email, password);
+    const result = authenticateUser(identifier, password);
     if (!result.success) {
       res.status(401).json({ error: result.error });
       return;
