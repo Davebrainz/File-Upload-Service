@@ -2,10 +2,14 @@ import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { kv } from '@vercel/kv';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const usersFilePath = path.join(__dirname, 'users.json');
+const usersKey = 'file-upload-service:users';
+const hasKvStorage = Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+const isVercelRuntime = Boolean(process.env.VERCEL);
 
 function ensureUsersFile() {
   if (!fs.existsSync(usersFilePath)) {
@@ -13,15 +17,11 @@ function ensureUsersFile() {
   }
 }
 
-function readUsers() {
+function readLocalUsers() {
   ensureUsersFile();
   const raw = fs.readFileSync(usersFilePath, 'utf8');
   const parsed = JSON.parse(raw);
   return Array.isArray(parsed.users) ? parsed.users : [];
-}
-
-function writeUsers(users) {
-  fs.writeFileSync(usersFilePath, JSON.stringify({ users }, null, 2));
 }
 
 export function hashPassword(password) {
@@ -44,14 +44,48 @@ export function verifyPassword(password, storedHash) {
   return crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(candidate));
 }
 
-export function getAuthStatus() {
-  return { hasAccount: readUsers().length > 0 };
+async function readUsers() {
+  if (hasKvStorage) {
+    const users = await kv.get(usersKey);
+    if (Array.isArray(users)) {
+      return users;
+    }
+
+    const existingUsers = readLocalUsers();
+    if (existingUsers.length > 0) {
+      await kv.set(usersKey, existingUsers);
+    }
+    return existingUsers;
+  }
+
+  if (isVercelRuntime) {
+    throw new Error('Persistent account storage is not configured.');
+  }
+
+  return readLocalUsers();
 }
 
-export function saveUser(email, password, username = '') {
+async function writeUsers(users) {
+  if (hasKvStorage) {
+    await kv.set(usersKey, users);
+    return;
+  }
+
+  if (isVercelRuntime) {
+    throw new Error('Persistent account storage is not configured.');
+  }
+
+  fs.writeFileSync(usersFilePath, JSON.stringify({ users }, null, 2));
+}
+
+export async function getAuthStatus() {
+  return { hasAccount: (await readUsers()).length > 0 };
+}
+
+export async function saveUser(email, password, username = '') {
   const normalizedEmail = (email || '').trim().toLowerCase();
   const normalizedUsername = (username || '').trim();
-  const users = readUsers();
+  const users = await readUsers();
 
   const existingUser = users.find((user) => user.email === normalizedEmail);
   if (existingUser) {
@@ -72,14 +106,14 @@ export function saveUser(email, password, username = '') {
     createdAt: new Date().toISOString(),
   });
 
-  writeUsers(users);
+  await writeUsers(users);
   return { success: true };
 }
 
-export function authenticateUser(identifier, password) {
+export async function authenticateUser(identifier, password) {
   const normalizedIdentifier = String(identifier || '').trim();
   const lookupKey = normalizedIdentifier.toLowerCase();
-  const users = readUsers();
+  const users = await readUsers();
   const user = users.find((entry) => {
     const matchesEmail = entry.email === lookupKey;
     const matchesUsername = typeof entry.username === 'string' && entry.username.trim() && entry.username.toLowerCase() === lookupKey;
@@ -97,10 +131,10 @@ export function authenticateUser(identifier, password) {
   return { success: true, user: { email: user.email, username: user.username || '' } };
 }
 
-export function updateUserUsername(email, username) {
+export async function updateUserUsername(email, username) {
   const normalizedEmail = (email || '').trim().toLowerCase();
   const normalizedUsername = (username || '').trim();
-  const users = readUsers();
+  const users = await readUsers();
   const user = users.find((entry) => entry.email === normalizedEmail);
 
   if (!user) {
@@ -119,10 +153,10 @@ export function updateUserUsername(email, username) {
   }
 
   user.username = normalizedUsername;
-  writeUsers(users);
+  await writeUsers(users);
   return { success: true, user: { email: user.email, username: user.username } };
 }
 
-export function resetUsersForTesting() {
-  writeUsers([]);
+export async function resetUsersForTesting() {
+  await writeUsers([]);
 }

@@ -1,5 +1,6 @@
 import express from 'express';
 import multer from 'multer';
+import { put } from '@vercel/blob';
 import path from 'path';
 import fs from 'fs';
 import cors from 'cors';
@@ -12,19 +13,23 @@ const __dirname = path.dirname(__filename);
 
 export function createApp() {
   const app = express();
+  app.set('trust proxy', 1);
   app.use(cors());
   app.use(express.json());
+  const asyncHandler = (handler) => (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
 
   const uploadDir = path.join(__dirname, 'uploads');
-  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+  const hasBlobStorage = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+  if (!hasBlobStorage && !fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
-  const storage = multer.diskStorage({
+  const diskStorage = multer.diskStorage({
     destination: uploadDir,
     filename: (req, file, cb) => {
       const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${path.extname(file.originalname)}`;
       cb(null, uniqueName);
     },
   });
+  const storage = hasBlobStorage || process.env.VERCEL ? multer.memoryStorage() : diskStorage;
   const upload = multer({ storage, limits: { fileSize: 50 * 1024 * 1024 } });
 
   app.use('/uploads', express.static(uploadDir));
@@ -42,27 +47,27 @@ export function createApp() {
     res.sendFile(filePath);
   });
 
-  app.get('/api/auth/status', (req, res) => {
-    res.json(getAuthStatus());
-  });
+  app.get('/api/auth/status', asyncHandler(async (req, res) => {
+    res.json(await getAuthStatus());
+  }));
 
-  app.post('/api/auth/signup', (req, res) => {
+  app.post('/api/auth/signup', asyncHandler(async (req, res) => {
     const { email, password, username } = req.body || {};
     if (!email || !password) {
       res.status(400).json({ error: 'Email and password are required.' });
       return;
     }
 
-    const result = saveUser(email, password, username);
+    const result = await saveUser(email, password, username);
     if (!result.success) {
       res.status(409).json({ error: result.error });
       return;
     }
 
     res.status(201).json({ message: 'Account created successfully.', user: { email, username: username || '' } });
-  });
+  }));
 
-  app.post('/api/auth/signin', (req, res) => {
+  app.post('/api/auth/signin', asyncHandler(async (req, res) => {
     const { email, username, password } = req.body || {};
     const identifier = email || username;
     if (!identifier || !password) {
@@ -70,39 +75,61 @@ export function createApp() {
       return;
     }
 
-    const result = authenticateUser(identifier, password);
+    const result = await authenticateUser(identifier, password);
     if (!result.success) {
       res.status(401).json({ error: result.error });
       return;
     }
 
     res.json({ message: 'Signed in successfully.', user: result.user });
-  });
+  }));
 
-  app.post('/api/auth/username', (req, res) => {
+  app.post('/api/auth/username', asyncHandler(async (req, res) => {
     const { email, username } = req.body || {};
     if (!email || !username) {
       res.status(400).json({ error: 'Email and username are required.' });
       return;
     }
 
-    const result = updateUserUsername(email, username);
+    const result = await updateUserUsername(email, username);
     if (!result.success) {
       res.status(404).json({ error: result.error });
       return;
     }
 
     res.json({ message: 'Username saved.', user: result.user });
-  });
+  }));
 
-  app.post('/api/upload', upload.single('file'), (req, res) => {
+  app.post('/api/upload', upload.single('file'), asyncHandler(async (req, res) => {
     if (!req.file) {
       res.status(400).json({ error: 'No file uploaded' });
       return;
     }
 
-    const shareUrl = `${req.protocol}://${req.get('host')}/share/${req.file.filename}`;
+    if (hasBlobStorage) {
+      const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)}${path.extname(req.file.originalname)}`;
+      const blob = await put(`uploads/${filename}`, req.file.buffer, {
+        access: 'public',
+        addRandomSuffix: false,
+        contentType: req.file.mimetype,
+      });
+      res.json({ url: blob.url, id: filename });
+      return;
+    }
+
+    if (process.env.VERCEL) {
+      res.status(503).json({ error: 'Persistent file storage is not configured.' });
+      return;
+    }
+
+    const shareUrl = `${req.protocol}://${req.get('host')}/share/${encodeURIComponent(req.file.filename)}`;
     res.json({ url: shareUrl, id: req.file.filename });
+  }));
+
+  app.use((error, req, res, next) => {
+    void next;
+    console.error(error);
+    res.status(500).json({ error: 'The server could not complete the request.' });
   });
 
   return app;

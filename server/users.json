@@ -2,15 +2,15 @@
   "users": [
     {
       "email": "first@example.com",
-      "passwordHash": "d99ae56f13e6108d18f05962cfe5d3a5:0ba8221cd275ddb61bf7b07782d200f012f2c36fe573b709518ca50bca50601aeb9fd319e0a8683ff1928a71ebc88920894b4fd585b4170ace281ba939c1d57c",
+      "passwordHash": "8ab22cd4205b4865d60a5b72a2aa42a1:da4bd025dca4fc43f509bf4615dd9ec722fa791a25ad6c9c754e8e8317c580ed312dd477a956f3c4f7efa82445d2d853ccbfbabeb8bd4f51944caeb3c6796b86",
       "username": "sharedname",
-      "createdAt": "2026-08-13T22:19:26.850Z"
+      "createdAt": "2026-08-20T23:36:14.583Z"
     },
     {
-      "email": "ogbodudavid51@gmail.com",
-      "passwordHash": "b4dfea504ad8226a046515bcb2117e6f:e938828bfbf13a688e40966b86d9dfeea10f4fe61a0587842d25f1880f8e361b548fe081b9869de311e631b8df69372c7dd6412f1837abc08b47515a7e8a6275",
-      "username": "DAVEBRAINZ",
-      "createdAt": "2026-08-13T22:21:26.954Z"
+      "email": "ogbodudavid49@gmail.com",
+      "passwordHash": "f5e93878951fe8d88372b3f11de13594:6059d97c6f80d5906166aa84504c0c47f1ad9210bc72b0c937398d8629ae8ff10ee80e88256fc2f2ed4db897709d73ae547132a99dba3b39c156d99981d4478c",
+      "username": "David",
+      "createdAt": "2026-08-20T23:38:56.802Z"
     }
   ]
 }

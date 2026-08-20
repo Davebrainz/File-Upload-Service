@@ -1,5 +1,16 @@
 # React + Vite
 
+## Vercel storage setup
+
+The API uses local files during local development and switches to Vercel storage in a Vercel runtime.
+
+1. Create a Redis store through the Vercel Marketplace and connect it to this project. It must provide `KV_REST_API_URL` and `KV_REST_API_TOKEN`.
+2. Create a Vercel Blob store and add its read/write token as `BLOB_READ_WRITE_TOKEN`.
+3. Make both sets of variables available in the Vercel Preview and Production environments.
+4. Redeploy after connecting the stores.
+
+Accounts are stored in KV and uploaded files are stored in Blob. Do not rely on `server/users.json` or `server/uploads` in production.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:
