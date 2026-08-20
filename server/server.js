@@ -129,6 +129,11 @@ export function createApp() {
   app.use((error, req, res, next) => {
     void next;
     console.error(error);
+    if (error.message?.includes('Persistent account storage')) {
+      res.status(503).json({ error: 'Account storage is not configured. Add KV_REST_API_URL and KV_REST_API_TOKEN in Vercel.' });
+      return;
+    }
+
     res.status(500).json({ error: 'The server could not complete the request.' });
   });
 

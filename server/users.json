@@ -2,15 +2,9 @@
   "users": [
     {
       "email": "first@example.com",
-      "passwordHash": "8ab22cd4205b4865d60a5b72a2aa42a1:da4bd025dca4fc43f509bf4615dd9ec722fa791a25ad6c9c754e8e8317c580ed312dd477a956f3c4f7efa82445d2d853ccbfbabeb8bd4f51944caeb3c6796b86",
+      "passwordHash": "e837dc2fc67b4a5a156a6b3a569eed66:ced58e7d15fabbf2ffed6ed9b9611f2f17aa2aa185cd23f0ead17c7da2a7b559d71325777bb0c2f12ac3761b30a8f21d0b6f820c9d4d1cf9406445bccf72d955",
       "username": "sharedname",
-      "createdAt": "2026-08-20T23:36:14.583Z"
-    },
-    {
-      "email": "ogbodudavid49@gmail.com",
-      "passwordHash": "f5e93878951fe8d88372b3f11de13594:6059d97c6f80d5906166aa84504c0c47f1ad9210bc72b0c937398d8629ae8ff10ee80e88256fc2f2ed4db897709d73ae547132a99dba3b39c156d99981d4478c",
-      "username": "David",
-      "createdAt": "2026-08-20T23:38:56.802Z"
+      "createdAt": "2026-08-20T23:50:37.702Z"
     }
   ]
 }
