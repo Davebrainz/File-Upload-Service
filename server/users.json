@@ -5,6 +5,12 @@
       "passwordHash": "e837dc2fc67b4a5a156a6b3a569eed66:ced58e7d15fabbf2ffed6ed9b9611f2f17aa2aa185cd23f0ead17c7da2a7b559d71325777bb0c2f12ac3761b30a8f21d0b6f820c9d4d1cf9406445bccf72d955",
       "username": "sharedname",
       "createdAt": "2026-08-20T23:50:37.702Z"
+    },
+    {
+      "email": "ogbodudavid48@gmail.com",
+      "passwordHash": "d66c6e6aded079c744f71f2fc9e6f919:7d3ceb109f13c74bd32bce8cb3bfebd2d53618406802d7400823f146e6674976a6bb85921011d82da3ca731ff1b24f1f9b9f5106eb3a790e71c3fa8423bd1784",
+      "username": "User",
+      "createdAt": "2026-08-21T12:51:37.538Z"
     }
   ]
 }
