@@ -11,6 +11,12 @@
       "passwordHash": "d66c6e6aded079c744f71f2fc9e6f919:7d3ceb109f13c74bd32bce8cb3bfebd2d53618406802d7400823f146e6674976a6bb85921011d82da3ca731ff1b24f1f9b9f5106eb3a790e71c3fa8423bd1784",
       "username": "User",
       "createdAt": "2026-08-21T12:51:37.538Z"
+    },
+    {
+      "email": "ogbodudavid51@gmail.com",
+      "passwordHash": "c80b63414842af894b4a7ef5c8c096d8:43acb86d23ea9898faa4f93a0195e4a9a655868228f358351f942824254bfe419d7198e750f59e314bcb0a3391223c526f5be1b44757e33a0dc66f73725c2a7e",
+      "username": "DAVEBRAINZ",
+      "createdAt": "2026-08-21T13:32:38.584Z"
     }
   ]
 }
