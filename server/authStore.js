@@ -2,17 +2,12 @@ import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { Redis } from '@upstash/redis';
+import { getUsers, setUsers, hasCloudinaryStorage } from './cloudinaryStore.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const usersFilePath = path.join(__dirname, 'users.json');
-const usersKey = 'file-upload-service:users';
-const kvRestApiUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-const kvRestApiToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
-const hasKvStorage = Boolean(kvRestApiUrl && kvRestApiToken);
 const isVercelRuntime = Boolean(process.env.VERCEL);
-const redis = hasKvStorage ? new Redis({ url: kvRestApiUrl, token: kvRestApiToken }) : null;
 
 function ensureUsersFile() {
   if (!fs.existsSync(usersFilePath)) {
@@ -48,17 +43,8 @@ export function verifyPassword(password, storedHash) {
 }
 
 async function readUsers() {
-  if (hasKvStorage) {
-    const users = await redis.get(usersKey);
-    if (Array.isArray(users)) {
-      return users;
-    }
-
-    const existingUsers = readLocalUsers();
-    if (existingUsers.length > 0) {
-      await redis.set(usersKey, existingUsers);
-    }
-    return existingUsers;
+  if (hasCloudinaryStorage) {
+    return getUsers();
   }
 
   if (isVercelRuntime) {
@@ -69,8 +55,8 @@ async function readUsers() {
 }
 
 async function writeUsers(users) {
-  if (hasKvStorage) {
-    await redis.set(usersKey, users);
+  if (hasCloudinaryStorage) {
+    await setUsers(users);
     return;
   }
 

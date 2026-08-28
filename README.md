@@ -1,15 +1,16 @@
 # React + Vite
 
-## Vercel storage setup
+## Cloudinary storage setup
 
-The API uses local files during local development and switches to Vercel storage in a Vercel runtime.
+The API uses local files during local development when Cloudinary is not configured. In Vercel, configure these Cloudinary variables in Preview and Production:
 
-1. Create a Redis store through the Vercel Marketplace and connect it to this project. It must provide `KV_REST_API_URL` and `KV_REST_API_TOKEN` (Upstash may call these `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`).
-2. Create a Vercel Blob store and add its read/write token as `BLOB_READ_WRITE_TOKEN`.
-3. Make both sets of variables available in the Vercel Preview and Production environments.
-4. Redeploy after connecting the stores.
+```text
+CLOUDINARY_CLOUD_NAME
+CLOUDINARY_API_KEY
+CLOUDINARY_API_SECRET
+```
 
-Accounts are stored in KV and uploaded files are stored in Blob. Do not rely on `server/users.json` or `server/uploads` in production.
+You can use `CLOUDINARY_URL` instead of the three separate variables. Uploaded files are stored as Cloudinary assets, and account records are stored as a private raw JSON asset. Redeploy after adding or changing the variables. Do not rely on `server/users.json` or `server/uploads` in production.
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 

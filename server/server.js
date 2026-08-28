@@ -1,12 +1,11 @@
 import express from 'express';
 import multer from 'multer';
-import { put } from '@vercel/blob';
 import path from 'path';
 import fs from 'fs';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
 import { authenticateUser, getAuthStatus, saveUser, updateUserUsername } from './authStore.js';
-import { getShareResponse } from './shareResponse.js';
+import { uploadFile, hasCloudinaryStorage } from './cloudinaryStore.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,8 +18,7 @@ export function createApp() {
   const asyncHandler = (handler) => (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
 
   const uploadDir = path.join(__dirname, 'uploads');
-  const hasBlobStorage = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
-  if (!hasBlobStorage && !fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+  if (!hasCloudinaryStorage && !fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
   const diskStorage = multer.diskStorage({
     destination: uploadDir,
@@ -29,7 +27,7 @@ export function createApp() {
       cb(null, uniqueName);
     },
   });
-  const storage = hasBlobStorage || process.env.VERCEL ? multer.memoryStorage() : diskStorage;
+  const storage = hasCloudinaryStorage || process.env.VERCEL ? multer.memoryStorage() : diskStorage;
   const upload = multer({ storage, limits: { fileSize: 50 * 1024 * 1024 } });
 
   app.use('/uploads', express.static(uploadDir));
@@ -41,9 +39,6 @@ export function createApp() {
       return;
     }
 
-    const responseMeta = getShareResponse(filePath);
-    res.setHeader('Content-Type', responseMeta.contentType);
-    res.setHeader('Content-Disposition', responseMeta.contentDisposition);
     res.sendFile(filePath);
   });
 
@@ -106,14 +101,9 @@ export function createApp() {
       return;
     }
 
-    if (hasBlobStorage) {
-      const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)}${path.extname(req.file.originalname)}`;
-      const blob = await put(`uploads/${filename}`, req.file.buffer, {
-        access: 'public',
-        addRandomSuffix: false,
-        contentType: req.file.mimetype,
-      });
-      res.json({ url: blob.url, id: filename });
+    if (hasCloudinaryStorage) {
+      const result = await uploadFile(req.file);
+      res.json({ url: result.secure_url, id: result.public_id });
       return;
     }
 
@@ -130,7 +120,7 @@ export function createApp() {
     void next;
     console.error(error);
     if (error.message?.includes('Persistent account storage')) {
-      res.status(503).json({ error: 'Account storage is not configured. Add KV_REST_API_URL and KV_REST_API_TOKEN in Vercel.' });
+      res.status(503).json({ error: 'Account storage is not configured. Add the Cloudinary credentials in Vercel.' });
       return;
     }
 
