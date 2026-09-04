@@ -33,95 +33,7 @@ function formatBytes(bytes) {
   return `${parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 }
 
-// NEW: Landing Page Component
-function LandingPage({ onGetStarted }) {
-  return (
-    <div className="min-h-screen bg-[#0f1117] text-white font-sans">
-      {/* NAVBAR */}
-      <nav className="flex justify-between items-center px-8 py-5 max-w-7xl mx-auto">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-cyan-400 rounded-lg"></div>
-          <span className="font-bold text-lg">UploadService</span>
-        </div>
-        <div className="hidden md:flex gap-8 text-gray-400">
-          <a href="#features" className="hover:text-white">Features</a>
-          <a href="#how" className="hover:text-white">How It Works</a>
-        </div>
-        <button onClick={onGetStarted} className="px-5 py-2 bg-cyan-400 text-black font-semibold rounded-lg hover:bg-cyan-300">
-          Get Started
-        </button>
-      </nav>
-
-      {/* HERO SECTION */}
-      <section className="text-center pt-20 pb-16 px-4">
-        <p className="text-cyan-400 text-sm font-semibold mb-3">• File Sharing, Simplified</p>
-        
-        <h1 className="text-5xl md:text-6xl font-extrabold mb-4">
-          FILE UPLOAD <br/> 
-          <span className="text-cyan-400">SERVICE PROGRAM</span>
-        </h1>
-
-        <p className="text-gray-400 max-w-2xl mx-auto mb-8">
-          Upload, share, and manage your files in seconds. Get a reshareable link for any JPG, PNG, WEBP, or PDF up to 50MB. 
-          View, download, and copy your links directly from your dashboard.
-        </p>
-
-        <button onClick={onGetStarted} className="px-8 py-3 bg-cyan-400 text-black font-bold rounded-lg hover:bg-cyan-300">
-          Get Started Free →
-        </button>
-      </section>
-
-      {/* FEATURES SECTION */}
-      <section id="features" className="max-w-6xl mx-auto py-20 px-4">
-        <h2 className="text-3xl font-bold text-center mb-12">Everything You Need To Share Files</h2>
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="bg-gray-800/50 p-6 rounded-2xl border border-gray-700">
-            <h3 className="text-xl font-bold text-cyan-400 mb-2">1. Upload Any File</h3>
-            <p className="text-gray-400">Drag and drop or select JPG, PNG, WEBP, and PDF files up to 50MB. Fast and secure uploads to the cloud.</p>
-          </div>
-          <div className="bg-gray-800/50 p-6 rounded-2xl border-gray-700">
-            <h3 className="text-xl font-bold text-cyan-400 mb-2">2. Get Reshareable Links</h3>
-            <p className="text-gray-400">Instantly get a public Cloudinary link after upload. Share it anywhere - WhatsApp, email, or website.</p>
-          </div>
-          <div className="bg-gray-800/50 p-6 rounded-2xl border border-gray-700">
-            <h3 className="text-xl font-bold text-cyan-400 mb-2">3. View Files Directly</h3>
-            <p className="text-gray-400">See all your uploaded files directly in your dashboard. Preview images and PDFs without leaving the app.</p>
-          </div>
-          <div className="bg-gray-800/50 p-6 rounded-2xl border border-gray-700">
-            <h3 className="text-xl font-bold text-cyan-400 mb-2">4. Open Link In Browser</h3>
-            <p className="text-gray-400">Click any link to open the file instantly in a new tab. Perfect for quick access and sharing.</p>
-          </div>
-          <div className="bg-gray-800/50 p-6 rounded-2xl border border-gray-700">
-            <h3 className="text-xl font-bold text-cyan-400 mb-2">5. Download Files</h3>
-            <p className="text-gray-400">Download any file you uploaded back to your device with one click. Keep backups easily.</p>
-          </div>
-          <div className="bg-gray-800/50 p-6 rounded-2xl border border-gray-700">
-            <h3 className="text-xl font-bold text-cyan-400 mb-2">6. Copy Link Instantly</h3>
-            <p className="text-gray-400">One-click button to copy your file’s shareable link to clipboard. No typing needed.</p>
-          </div>
-        </div>
-      </section>
-
-      {/* HOW IT WORKS */}
-      <section id="how" className="bg-gray-900/50 py-20 px-4">
-        <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
-        <div className="flex flex-col md:flex-row justify-center gap-10 max-w-4xl mx-auto text-center">
-          <div><div className="text-5xl font-bold text-cyan-400 mb-2">1</div><p>Sign Up / Log In</p></div>
-          <div><div className="text-5xl font-bold text-cyan-400 mb-2">2</div><p>Upload Your File</p></div>
-          <div><div className="text-5xl font-bold text-cyan-400 mb-2">3</div><p>Copy, View, or Download Link</p></div>
-        </div>
-      </section>
-
-      <footer className="text-center py-8 text-gray-500 border-t border-gray-800">
-        © 2026 FILE UPLOAD SERVICE PROGRAM by @DAVBRAINZ
-      </footer>
-    </div>
-  )
-}
-
-
 export default function FileUploadService() {
-  const [showLanding, setShowLanding] = useState(true); // NEW: controls landing page
   const [state, setState] = useState(initialState);
   const [authState, setAuthState] = useState(initialAuthState);
 
@@ -163,7 +75,7 @@ export default function FileUploadService() {
     }
 
     setState({
-  ...initialState,
+   ...initialState,
       selectedFile: file,
       uploadState: 'ready',
       fileMeta: {
@@ -189,13 +101,13 @@ export default function FileUploadService() {
     try {
       const result = await submitAuthRequest({
         mode: authState.mode,
-        email: authState.email,
+        email: authState.email, // this field now accepts email OR username for signin
         password: authState.password,
         username: authState.username,
       });
 
       setAuthState((prev) => ({
-    ...prev,
+     ...prev,
         loading: false,
         message: result.payload.message || 'Success.',
         isAuthenticated: true,
@@ -209,7 +121,7 @@ export default function FileUploadService() {
       }
     } catch (error) {
       setAuthState((prev) => ({
-    ...prev,
+     ...prev,
         loading: false,
         message: error.message || 'Authentication failed.',
       }));
@@ -239,7 +151,7 @@ export default function FileUploadService() {
       }
 
       setAuthState((prev) => ({
-    ...prev,
+     ...prev,
         loading: false,
         message: payload.message || 'Username saved.',
         username: payload.user?.username || prev.username,
@@ -247,7 +159,7 @@ export default function FileUploadService() {
       }));
     } catch (error) {
       setAuthState((prev) => ({
-    ...prev,
+     ...prev,
         loading: false,
         message: error.message || 'Could not save the username.',
       }));
@@ -280,7 +192,7 @@ export default function FileUploadService() {
       const shareUrl = payload.url || buildShareUrl(buildApiUrl('/share'), payload.id || 'unknown');
 
       setState((prev) => ({
-    ...prev,
+     ...prev,
         uploadState: 'success',
         message: 'Upload complete. Share this link securely.',
         shareUrl,
@@ -288,20 +200,15 @@ export default function FileUploadService() {
       }));
     } catch (error) {
       setState((prev) => ({
-    ...prev,
+     ...prev,
         uploadState: 'error',
         message: error.message || 'Upload failed. Please try again.',
       }));
     }
   };
 
-  // NEW: Show landing first
-  if (showLanding) {
-    return <LandingPage onGetStarted={() => setShowLanding(false)} />;
-  }
-
-  // YOUR ORIGINAL CODE STARTS HERE - UNCHANGED
   return (
+    // CHANGED: made container fatter - max-w-3xl and more padding
     <div className="min-h-screen bg-linear-to-br from-blue-900 to-blue-600 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-3xl">
         <div className="upload-card bg-black/30 backdrop-blur-lg rounded-2xl p-10 md:p-14 space-y-6 shadow-2xl">
@@ -313,6 +220,7 @@ export default function FileUploadService() {
               </div>
 
               {authState.mode === 'signup'? (
+                // SIGN UP: Email -> Username -> Password
                 <>
                   <label className="field-label" htmlFor="email">Email</label>
                   <input
@@ -342,6 +250,7 @@ export default function FileUploadService() {
                   />
                 </>
               ) : (
+                // SIGN IN: Only Email/Username + Password
                 <>
                   <label className="field-label" htmlFor="email">Email or Username</label>
                   <input
@@ -371,7 +280,7 @@ export default function FileUploadService() {
                 type="button"
                 className="secondary-btn"
                 onClick={() => setAuthState((prev) => ({
-              ...prev,
+               ...prev,
                   mode: prev.mode === 'signup'? 'signin' : 'signup',
                   message: prev.mode === 'signup'? 'Use your saved account to sign in.' : 'Create a new account.'
                 }))}
