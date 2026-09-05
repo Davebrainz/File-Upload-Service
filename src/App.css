@@ -19,7 +19,7 @@ body,
 
 body {
   margin: 0;
-  background-image: url('person-playing-3d-video-games-device.jpg');
+  background-image: var(--paper);
   background-size: cover;
   background-position: center;
   display: flex;
