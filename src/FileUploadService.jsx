@@ -208,10 +208,13 @@ export default function FileUploadService() {
   };
 
   return (
-    // CHANGED: made container fatter - max-w-3xl and more padding
-    <div className="min-h-screen bg-linear-to-br from-blue-900 to-blue-600 flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-3xl">
-        <div className="upload-card bg-black/30 backdrop-blur-lg rounded-2xl p-10 md:p-14 space-y-6 shadow-2xl">
+    <div className="app-page">
+      <div className="app-shell">
+        <div className="app-brandbar">
+          <a className="brand-mark" href="#top" aria-label="File Upload Service home"><span className="brand-icon" aria-hidden="true">↑</span><span>File Upload Service</span></a>
+          <span className="app-brand-note">Simple sharing, thoughtfully made</span>
+        </div>
+        <div className="upload-card">
           {!authState.isAuthenticated? (
             <form className="auth-form" onSubmit={handleAuthSubmit}>
               <div className="auth-header">
