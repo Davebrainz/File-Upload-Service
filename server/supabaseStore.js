@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const bucketName = process.env.SUPABASE_STORAGE_BUCKET || 'uploads';
+const bucketName = process.env.SUPABASE_STORAGE_BUCKET?.trim() || 'uploads';
 const usersFileName = 'private/users.json';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
