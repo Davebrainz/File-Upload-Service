@@ -90,7 +90,7 @@ export function createApp() {
     }
 
     if (error.message?.includes('Persistent account storage')) {
-      res.status(503).json({ error: 'Account storage is not configured. Add the Cloudinary credentials in Vercel.' });
+      res.status(503).json({ error: 'Account storage is not configured. Add Supabase Storage credentials in Vercel.' });
       return;
     }
 

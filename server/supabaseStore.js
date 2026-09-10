@@ -6,12 +6,12 @@ import { fileURLToPath } from 'url';
 const bucketName = process.env.SUPABASE_STORAGE_BUCKET || 'uploads';
 const usersFileName = 'private/users.json';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const uploadsDirectory = path.join(path.dirname(fileURLToPath(import.meta.url)), 'uploads');
 const isVercelRuntime = Boolean(process.env.VERCEL);
 
-export const hasSupabaseStorage = Boolean(supabaseUrl && supabaseAnonKey);
-const supabase = hasSupabaseStorage ? createClient(supabaseUrl, supabaseAnonKey) : null;
+export const hasSupabaseStorage = Boolean(supabaseUrl && supabaseKey);
+const supabase = hasSupabaseStorage ? createClient(supabaseUrl, supabaseKey) : null;
 
 function safeFileName(name) {
   return name.replace(/[^a-zA-Z0-9._-]/g, '_');

@@ -17,10 +17,11 @@ Create a public Storage bucket named `uploads`, then add these variables to Verc
 ```text
 NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...
 SUPABASE_STORAGE_BUCKET=uploads
 ```
 
-The server sends validated multipart uploads to Supabase Storage and accepts files up to 50 MB. The frontend validates supported file types and the 50 MB maximum before uploading. Configure Storage policies that allow uploads with the anon key, and make the bucket public if shared links should open directly.
+`SUPABASE_SERVICE_ROLE_KEY` is server-only and should be configured in Vercel for account and upload writes. The server falls back to the anon key when the service-role key is not present, in which case Supabase Storage policies must allow the required writes. Make the bucket public if shared links should open directly. The server accepts files up to 50 MB, and the frontend validates supported file types and the same size limit.
 
 ## Cloudinary storage setup
 
