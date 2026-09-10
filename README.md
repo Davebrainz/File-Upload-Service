@@ -8,7 +8,7 @@ API requests use the current site by default, so deployments with the included V
 VITE_API_BASE_URL=https://your-api.example.com
 ```
 
-The API uses Render PostgreSQL for account data and Supabase Storage for uploaded files. The API base URL and storage provider are independent settings, so the frontend can stay on Vercel while the backend runs on Render.
+The API uses Render PostgreSQL for account data and Supabase Storage for uploaded files. The frontend can stay on Vercel while the backend runs on Render; Vercel proxies API requests to the Render service and does not need Supabase credentials.
 
 ## Render PostgreSQL setup
 
@@ -72,14 +72,16 @@ SUPABASE_SERVICE_ROLE_KEY=...
 SUPABASE_STORAGE_BUCKET=uploads
 ```
 
-Deploy the Vite frontend as a separate Render Static Site:
+Deploy the Vite frontend to Vercel using the included `vercel.json`. It proxies `/api/*` and `/uploads/*` to `https://file-upload-service-ydue.onrender.com`, so Supabase and PostgreSQL variables belong only on the Render Web Service.
+
+Deploying the Vite frontend as a separate Render Static Site is also supported:
 
 ```text
 Build command: npm install && npm run build
 Publish directory: dist
 ```
 
-Set this frontend variable in Vercel to the Render Web Service URL, without a trailing slash:
+If the frontend is deployed to Render instead, set this frontend variable on the Render Static Site to the Render Web Service URL, without a trailing slash:
 
 ```text
 VITE_API_BASE_URL=https://your-api-service.onrender.com
