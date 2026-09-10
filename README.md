@@ -8,11 +8,29 @@ API requests use the current site by default, so deployments with the included V
 VITE_API_BASE_URL=https://your-api.example.com
 ```
 
-The API uses Supabase Storage for uploaded files and account data when `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and `SUPABASE_STORAGE_BUCKET` are configured. Cloudinary is used for account data only when Supabase Storage is not configured. The API base URL and storage provider are independent settings, so you can host the API wherever you prefer and change storage providers without changing frontend code.
+The API uses Render PostgreSQL for account data and Supabase Storage for uploaded files. The API base URL and storage provider are independent settings, so the frontend can stay on Vercel while the backend runs on Render.
+
+## Render PostgreSQL setup
+
+Create a PostgreSQL database in Render and add its internal `DATABASE_URL` to the Render Web Service. The server creates the `users` table automatically on its first request. No manual SQL migration is required.
+
+```text
+DATABASE_URL=postgresql://...
+```
+
+Do not put `DATABASE_URL` in Vercel. It is a backend-only secret.
+
+If existing accounts must be preserved, run this once from the repository root after setting `DATABASE_URL` locally:
+
+```text
+npm run migrate:users
+```
+
+The migration copies the password hashes and usernames from `server/users.json`; it does not print passwords.
 
 ## Supabase Storage setup
 
-Create a public Storage bucket named `uploads`, then add these variables to Vercel in both Preview and Production before redeploying:
+Create a public Storage bucket named `uploads`, then add these variables to the Render Web Service:
 
 ```text
 NEXT_PUBLIC_SUPABASE_URL=...
@@ -21,11 +39,11 @@ SUPABASE_SERVICE_ROLE_KEY=...
 SUPABASE_STORAGE_BUCKET=uploads
 ```
 
-`SUPABASE_SERVICE_ROLE_KEY` is server-only and should be configured in Vercel for account and upload writes. The server falls back to the anon key when the service-role key is not present, in which case Supabase Storage policies must allow the required writes. Make the bucket public if shared links should open directly. The server accepts files up to 50 MB, and the frontend validates supported file types and the same size limit.
+`SUPABASE_SERVICE_ROLE_KEY` is server-only and should be configured only on Render. The server falls back to the anon key when the service-role key is not present, in which case Supabase Storage policies must allow uploads. Make the bucket public so shared links open directly. The server accepts files up to 50 MB, and the frontend validates supported file types and the same size limit.
 
-## Cloudinary storage setup
+## Cloudinary
 
-The API uses local files during local development when Cloudinary is not configured. In Vercel, configure these Cloudinary variables in Preview and Production:
+Cloudinary is no longer used by the application. You can delete these variables from both Vercel and Render if they exist:
 
 ```text
 CLOUDINARY_CLOUD_NAME
@@ -33,7 +51,7 @@ CLOUDINARY_API_KEY
 CLOUDINARY_API_SECRET
 ```
 
-You can use `CLOUDINARY_URL` instead of the three separate variables. Uploaded files are stored as Cloudinary assets, and account records are stored as a private raw JSON asset. Redeploy after adding or changing the variables. Do not rely on `server/users.json` or `server/uploads` in production.
+They are not needed for PostgreSQL or Supabase Storage. If another future backend feature uses Cloudinary, put those variables on that backend service only, never in the frontend Vercel project.
 
 ## Render deployment
 
@@ -47,6 +65,7 @@ Start command: npm start
 The production start command does not load `.env.local`. Add deployment variables in Render's Environment settings instead. Configure these on the Web Service:
 
 ```text
+DATABASE_URL=...
 NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 SUPABASE_SERVICE_ROLE_KEY=...
@@ -60,7 +79,7 @@ Build command: npm install && npm run build
 Publish directory: dist
 ```
 
-Set this frontend variable to the Web Service URL, without a trailing slash:
+Set this frontend variable in Vercel to the Render Web Service URL, without a trailing slash:
 
 ```text
 VITE_API_BASE_URL=https://your-api-service.onrender.com

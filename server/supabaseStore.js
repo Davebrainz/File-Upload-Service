@@ -5,10 +5,14 @@ import { fileURLToPath } from 'url';
 
 const bucketName = process.env.SUPABASE_STORAGE_BUCKET || 'uploads';
 const usersFileName = 'private/users.json';
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const uploadsDirectory = path.join(path.dirname(fileURLToPath(import.meta.url)), 'uploads');
-const isVercelRuntime = Boolean(process.env.VERCEL);
+const isServerlessRuntime = Boolean(
+  process.env.VERCEL ||
+  process.env.VERCEL_ENV ||
+  process.env.AWS_LAMBDA_FUNCTION_NAME,
+);
 
 export const hasSupabaseStorage = Boolean(supabaseUrl && supabaseKey);
 const supabase = hasSupabaseStorage ? createClient(supabaseUrl, supabaseKey) : null;
@@ -32,7 +36,7 @@ export async function uploadFile(file) {
   const fileName = `public/${Date.now()}-${crypto.randomUUID()}-${safeFileName(file.originalname || 'upload')}`;
 
   if (!supabase) {
-    if (isVercelRuntime) {
+    if (isServerlessRuntime) {
       throw new Error('Supabase Storage is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.');
     }
 
@@ -57,7 +61,7 @@ export async function uploadFile(file) {
 
     return { url: urlData.publicUrl, key: fileName };
   } catch (error) {
-    if (isVercelRuntime) {
+    if (isServerlessRuntime) {
       throw error;
     }
 

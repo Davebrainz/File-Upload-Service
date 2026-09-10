@@ -89,7 +89,10 @@ export function createApp() {
       return;
     }
 
-    if (error.message?.includes('Persistent account storage')) {
+    if (
+      error.message?.includes('Persistent account storage') ||
+      error.message?.includes('Supabase Storage is not configured')
+    ) {
       res.status(503).json({ error: 'Account storage is not configured. Add Supabase Storage credentials in Vercel.' });
       return;
     }

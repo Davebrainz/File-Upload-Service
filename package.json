@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "test": "node --test tests/*.test.js",
     "start": "node server/server.js",
+    "migrate:users": "node server/migrateUsers.js",
     "server": "node --env-file=.env.local server/server.js",
     "dev:all": "npm run server"
   },
@@ -19,6 +20,7 @@
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "multer": "^1.4.5-lts.1",
+    "pg": "^8.23.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
   },
