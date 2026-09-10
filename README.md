@@ -35,6 +35,39 @@ CLOUDINARY_API_SECRET
 
 You can use `CLOUDINARY_URL` instead of the three separate variables. Uploaded files are stored as Cloudinary assets, and account records are stored as a private raw JSON asset. Redeploy after adding or changing the variables. Do not rely on `server/users.json` or `server/uploads` in production.
 
+## Render deployment
+
+Deploy the API as a Render Web Service from the repository root:
+
+```text
+Build command: npm install
+Start command: npm start
+```
+
+The production start command does not load `.env.local`. Add deployment variables in Render's Environment settings instead. Configure these on the Web Service:
+
+```text
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...
+SUPABASE_STORAGE_BUCKET=uploads
+```
+
+Deploy the Vite frontend as a separate Render Static Site:
+
+```text
+Build command: npm install && npm run build
+Publish directory: dist
+```
+
+Set this frontend variable to the Web Service URL, without a trailing slash:
+
+```text
+VITE_API_BASE_URL=https://your-api-service.onrender.com
+```
+
+Redeploy both services after changing environment variables.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:
