@@ -4,7 +4,7 @@ import path from 'path';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
 import { authenticateUser, getAuthStatus, saveUser, updateUserUsername } from './authStore.js';
-import { uploadFile, hasUploadThingStorage } from './uploadThingStore.js';
+import { uploadFile, hasSupabaseStorage } from './supabaseStore.js';
 
 const __filename = fileURLToPath(import.meta.url);
 
@@ -71,8 +71,8 @@ export function createApp() {
   }));
 
   app.post('/api/upload', upload.single('file'), asyncHandler(async (req, res) => {
-    if (!hasUploadThingStorage) {
-      res.status(503).json({ error: 'UploadThing is not configured. Add UPLOADTHING_TOKEN.' });
+    if (!hasSupabaseStorage) {
+      res.status(503).json({ error: 'Supabase Storage is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.' });
       return;
     }
 

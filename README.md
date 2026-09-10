@@ -1,14 +1,16 @@
 # React + Vite
 
-## UploadThing setup
+## Supabase Storage setup
 
-Add these variables to Vercel in both Preview and Production, then redeploy:
+Create a public Storage bucket named `uploads`, then add these variables to Vercel in both Preview and Production before redeploying:
 
 ```text
-UPLOADTHING_TOKEN=...
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_STORAGE_BUCKET=uploads
 ```
 
-The server sends validated multipart uploads to UploadThing and accepts files up to 50 MB. The frontend validates supported file types and the 50 MB maximum before uploading.
+The server sends validated multipart uploads to Supabase Storage and accepts files up to 50 MB. The frontend validates supported file types and the 50 MB maximum before uploading. Configure Storage policies that allow uploads with the anon key, and make the bucket public if shared links should open directly.
 
 ## Cloudinary storage setup
 
