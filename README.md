@@ -1,5 +1,15 @@
 # React + Vite
 
+## API configuration
+
+API requests use the current site by default, so deployments with the included Vercel routes do not need an API URL. During local Vite development, `/api` is proxied to `http://localhost:4000` by default. To use a separate API deployment, set `VITE_API_BASE_URL` to its base URL, without a trailing slash:
+
+```text
+VITE_API_BASE_URL=https://your-api.example.com
+```
+
+The API uses Supabase Storage for uploaded files and account data when `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and `SUPABASE_STORAGE_BUCKET` are configured. Cloudinary is used for account data only when Supabase Storage is not configured. The API base URL and storage provider are independent settings, so you can host the API wherever you prefer and change storage providers without changing frontend code.
+
 ## Supabase Storage setup
 
 Create a public Storage bucket named `uploads`, then add these variables to Vercel in both Preview and Production before redeploying:

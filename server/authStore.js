@@ -2,12 +2,14 @@ import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { getUsers, setUsers, hasCloudinaryStorage } from './cloudinaryStore.js';
+import { getUsers as getCloudinaryUsers, setUsers as setCloudinaryUsers, hasCloudinaryStorage } from './cloudinaryStore.js';
+import { getUsers as getSupabaseUsers, setUsers as setSupabaseUsers, hasSupabaseStorage } from './supabaseStore.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const usersFilePath = path.join(__dirname, 'users.json');
 const isVercelRuntime = Boolean(process.env.VERCEL);
+const useRemoteAccountStorage = isVercelRuntime;
 
 function ensureUsersFile() {
   if (!fs.existsSync(usersFilePath)) {
@@ -43,11 +45,24 @@ export function verifyPassword(password, storedHash) {
 }
 
 async function readUsers() {
-  if (hasCloudinaryStorage) {
-    return getUsers();
+  if (useRemoteAccountStorage && hasSupabaseStorage) {
+    try {
+      return await getSupabaseUsers();
+    } catch (error) {
+      if (isVercelRuntime) {
+        throw error;
+      }
+
+      console.warn('Supabase account storage is unavailable locally. Using server/users.json instead.');
+      return readLocalUsers();
+    }
   }
 
-  if (isVercelRuntime) {
+  if (useRemoteAccountStorage && hasCloudinaryStorage) {
+    return getCloudinaryUsers();
+  }
+
+  if (useRemoteAccountStorage) {
     throw new Error('Persistent account storage is not configured.');
   }
 
@@ -55,12 +70,27 @@ async function readUsers() {
 }
 
 async function writeUsers(users) {
-  if (hasCloudinaryStorage) {
-    await setUsers(users);
+  if (useRemoteAccountStorage && hasSupabaseStorage) {
+    try {
+      await setSupabaseUsers(users);
+      return;
+    } catch (error) {
+      if (isVercelRuntime) {
+        throw error;
+      }
+
+      console.warn('Supabase account storage is unavailable locally. Saving to server/users.json instead.');
+      fs.writeFileSync(usersFilePath, JSON.stringify({ users }, null, 2));
+    }
     return;
   }
 
-  if (isVercelRuntime) {
+  if (useRemoteAccountStorage && hasCloudinaryStorage) {
+    await setCloudinaryUsers(users);
+    return;
+  }
+
+  if (useRemoteAccountStorage) {
     throw new Error('Persistent account storage is not configured.');
   }
 

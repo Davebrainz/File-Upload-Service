@@ -4,7 +4,7 @@ import path from 'path';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
 import { authenticateUser, getAuthStatus, saveUser, updateUserUsername } from './authStore.js';
-import { uploadFile, hasSupabaseStorage } from './supabaseStore.js';
+import { uploadFile } from './supabaseStore.js';
 
 const __filename = fileURLToPath(import.meta.url);
 
@@ -13,6 +13,7 @@ export function createApp() {
   app.set('trust proxy', 1);
   app.use(cors());
   app.use(express.json());
+  app.use('/uploads', express.static(path.join(path.dirname(__filename), 'uploads')));
   const asyncHandler = (handler) => (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
 
   const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
@@ -71,11 +72,6 @@ export function createApp() {
   }));
 
   app.post('/api/upload', upload.single('file'), asyncHandler(async (req, res) => {
-    if (!hasSupabaseStorage) {
-      res.status(503).json({ error: 'Supabase Storage is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.' });
-      return;
-    }
-
     if (!req.file) {
       res.status(400).json({ error: 'No file uploaded' });
       return;
@@ -110,7 +106,7 @@ const isDirectRun = process.argv[1] && path.resolve(process.argv[1]) === __filen
 
 function startServer(port = 4000) {
   const server = app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
+    console.log(`Server running on port ${port}`);
   });
 
   server.on('error', (error) => {
