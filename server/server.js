@@ -1,14 +1,12 @@
 import express from 'express';
 import multer from 'multer';
 import path from 'path';
-import fs from 'fs';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
 import { authenticateUser, getAuthStatus, saveUser, updateUserUsername } from './authStore.js';
-import { uploadFile, hasCloudinaryStorage } from './cloudinaryStore.js';
+import { uploadFile, hasUploadThingStorage } from './uploadThingStore.js';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 export function createApp() {
   const app = express();
@@ -17,30 +15,7 @@ export function createApp() {
   app.use(express.json());
   const asyncHandler = (handler) => (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
 
-  const uploadDir = path.join(__dirname, 'uploads');
-  if (!hasCloudinaryStorage && !fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-
-  const diskStorage = multer.diskStorage({
-    destination: uploadDir,
-    filename: (req, file, cb) => {
-      const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${path.extname(file.originalname)}`;
-      cb(null, uniqueName);
-    },
-  });
-  const storage = hasCloudinaryStorage || process.env.VERCEL ? multer.memoryStorage() : diskStorage;
-  const upload = multer({ storage, limits: { fileSize: 50 * 1024 * 1024 } });
-
-  app.use('/uploads', express.static(uploadDir));
-
-  app.get('/share/:filename', (req, res) => {
-    const filePath = path.join(uploadDir, req.params.filename);
-    if (!fs.existsSync(filePath)) {
-      res.status(404).send('File not found');
-      return;
-    }
-
-    res.sendFile(filePath);
-  });
+  const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
 
   app.get('/api/auth/status', asyncHandler(async (req, res) => {
     res.json(await getAuthStatus());
@@ -96,29 +71,28 @@ export function createApp() {
   }));
 
   app.post('/api/upload', upload.single('file'), asyncHandler(async (req, res) => {
+    if (!hasUploadThingStorage) {
+      res.status(503).json({ error: 'UploadThing is not configured. Add UPLOADTHING_TOKEN.' });
+      return;
+    }
+
     if (!req.file) {
       res.status(400).json({ error: 'No file uploaded' });
       return;
     }
 
-    if (hasCloudinaryStorage) {
-      const result = await uploadFile(req.file);
-      res.json({ url: result.secure_url, id: result.public_id });
-      return;
-    }
-
-    if (process.env.VERCEL) {
-      res.status(503).json({ error: 'Persistent file storage is not configured.' });
-      return;
-    }
-
-    const shareUrl = `${req.protocol}://${req.get('host')}/share/${encodeURIComponent(req.file.filename)}`;
-    res.json({ url: shareUrl, id: req.file.filename });
+    const result = await uploadFile(req.file);
+    res.json({ url: result.url, id: result.key });
   }));
 
   app.use((error, req, res, next) => {
     void next;
     console.error(error);
+    if (error.code === 'LIMIT_FILE_SIZE') {
+      res.status(413).json({ error: 'File size exceeds 50MB limit.' });
+      return;
+    }
+
     if (error.message?.includes('Persistent account storage')) {
       res.status(503).json({ error: 'Account storage is not configured. Add the Cloudinary credentials in Vercel.' });
       return;

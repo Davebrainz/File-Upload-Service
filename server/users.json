@@ -2,15 +2,9 @@
   "users": [
     {
       "email": "first@example.com",
-      "passwordHash": "29e204b212a2609ff2191f1b7910d628:6cd4711f1aa1cc465eb1d7de0b289574111c790f7f7e63d111927aecf0d28ec782f4531d5898409599f788ba16bd7820bdc4cdc3153da0bf68a70ba0307b3dde",
+      "passwordHash": "b081b86f761b2d3ff3dd44e5d842eaf0:51f1e58f96ec012b159049c2308bc23ebf12c0cb45cdba277697f2511043dffdca0c4964c039eb01c0ce651260a3214b7837d2cb69b52ed9badc98676fe538b9",
       "username": "sharedname",
-      "createdAt": "2026-09-07T15:42:49.296Z"
-    },
-    {
-      "email": "ogbodudavid51@gmail.com",
-      "passwordHash": "dab201f9868cce9b7a1c281324d7898c:670db9a6e219d79118e045714552881e83e4d7846cb568aeaf18c399148d521a2aaca8b5043fe8e5dc4e066486aa67ca2fa6afb174414d37896acc97e5c557cd",
-      "username": "DAVEBRAINZ",
-      "createdAt": "2026-09-07T15:44:43.376Z"
+      "createdAt": "2026-09-10T10:33:34.017Z"
     }
   ]
 }

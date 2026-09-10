@@ -1,5 +1,15 @@
 # React + Vite
 
+## UploadThing setup
+
+Add these variables to Vercel in both Preview and Production, then redeploy:
+
+```text
+UPLOADTHING_TOKEN=...
+```
+
+The server sends validated multipart uploads to UploadThing and accepts files up to 50 MB. The frontend validates supported file types and the 50 MB maximum before uploading.
+
 ## Cloudinary storage setup
 
 The API uses local files during local development when Cloudinary is not configured. In Vercel, configure these Cloudinary variables in Preview and Production:

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { validateUpload, buildShareUrl } from './lib/fileValidation.js';
+import { validateUpload } from './lib/fileValidation.js';
 import { submitAuthRequest } from './lib/authFlow.js';
-import { apiFetch, buildApiUrl } from './lib/apiClient.js';
+import { apiFetch } from './lib/apiClient.js';
 
 const initialState = {
   selectedFile: null,
@@ -174,22 +174,21 @@ export default function FileUploadService() {
 
     setState((prev) => ({...prev, uploadState: 'uploading', message: 'Uploading file...' }));
 
-    const formData = new FormData();
-    formData.append('file', state.selectedFile);
-
     try {
-      const response = await apiFetch('/api/upload', {
+      const formData = new FormData();
+      formData.append('file', state.selectedFile);
+      const uploadResponse = await apiFetch('/api/upload', {
         method: 'POST',
         body: formData,
       });
 
-      if (!response.ok) {
-        const payload = await response.json().catch(() => ({}));
+      if (!uploadResponse.ok) {
+        const payload = await uploadResponse.json().catch(() => ({}));
         throw new Error(payload.error || 'Upload failed.');
       }
 
-      const payload = await response.json();
-      const shareUrl = payload.url || buildShareUrl(buildApiUrl('/share'), payload.id || 'unknown');
+      const result = await uploadResponse.json();
+      const shareUrl = result.url;
 
       setState((prev) => ({
      ...prev,
