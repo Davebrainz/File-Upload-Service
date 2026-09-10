@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 
-const bucketName = process.env.SUPABASE_STORAGE_BUCKET || 'uploads';
+const bucketName = process.env.SUPABASE_STORAGE_BUCKET || 'Davebrainz'; // Default to your bucket
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -16,9 +16,14 @@ export async function uploadFile(file) {
     throw new Error('Supabase Storage is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.');
   }
 
-  const filePath = `uploads/${Date.now()}-${crypto.randomUUID()}-${safeFileName(file.originalname)}`;
-  const { error } = await supabase.storage.from(bucketName).upload(filePath, file.buffer, {
-    contentType: file.mimetype || 'application/octet-stream',
+  if (!file) {
+    throw new Error('No file provided');
+  }
+
+  const fileName = `public/${Date.now()}-${crypto.randomUUID()}-${safeFileName(file.name)}`;
+  
+  const { data, error } = await supabase.storage.from(bucketName).upload(fileName, file, {
+    contentType: file.type || 'application/octet-stream',
     upsert: false,
   });
 
@@ -26,10 +31,11 @@ export async function uploadFile(file) {
     throw error;
   }
 
-  const { data } = supabase.storage.from(bucketName).getPublicUrl(filePath);
-  if (!data?.publicUrl) {
+  const { data: urlData } = supabase.storage.from(bucketName).getPublicUrl(fileName);
+  
+  if (!urlData?.publicUrl) {
     throw new Error('Supabase Storage returned an invalid upload response.');
   }
 
-  return { url: data.publicUrl, key: filePath };
+  return { url: urlData.publicUrl, key: fileName };
 }
