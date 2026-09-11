@@ -8,17 +8,17 @@ API requests use the current site by default, so deployments with the included V
 VITE_API_BASE_URL=https://your-api.example.com
 ```
 
-The API uses Render PostgreSQL for account data and Supabase Storage for uploaded files. The frontend can stay on Vercel while the backend runs on Render; Vercel proxies API requests to the Render service and does not need Supabase credentials.
+The API runs as a Vercel Node function. It uses PostgreSQL for account data and Supabase Storage for uploaded files.
 
-## Render PostgreSQL setup
+## PostgreSQL setup
 
-Create a PostgreSQL database in Render and add its internal `DATABASE_URL` to the Render Web Service. The server creates the `users` table automatically on its first request. No manual SQL migration is required.
+Create a PostgreSQL database and add its `DATABASE_URL` to the Vercel project. The server creates the `users` table automatically on its first request. No manual SQL migration is required.
 
 ```text
 DATABASE_URL=postgresql://...
 ```
 
-Do not put `DATABASE_URL` in Vercel. It is a backend-only secret.
+`DATABASE_URL` is a backend-only secret. Keep it out of frontend-exposed variables.
 
 If existing accounts must be preserved, run this once from the repository root after setting `DATABASE_URL` locally:
 
@@ -30,7 +30,7 @@ The migration copies the password hashes and usernames from `server/users.json`;
 
 ## Supabase Storage setup
 
-Create a public Storage bucket named `uploads`, then add these variables to the Render Web Service:
+Create a public Storage bucket named `uploads`, then add these variables to the Vercel project:
 
 ```text
 NEXT_PUBLIC_SUPABASE_URL=...
@@ -39,7 +39,7 @@ SUPABASE_SERVICE_ROLE_KEY=...
 SUPABASE_STORAGE_BUCKET=uploads
 ```
 
-`SUPABASE_SERVICE_ROLE_KEY` is server-only and should be configured only on Render. The server falls back to the anon key when the service-role key is not present, in which case Supabase Storage policies must allow uploads. Make the bucket public so shared links open directly. The server accepts files up to 50 MB, and the frontend validates supported file types and the same size limit.
+`SUPABASE_SERVICE_ROLE_KEY` is server-only and should be configured only in Vercel's server environment. Make the bucket public so shared links open directly. The server accepts files up to 50 MB, and the frontend validates supported file types and the same size limit.
 
 ## Cloudinary
 
@@ -53,16 +53,16 @@ CLOUDINARY_API_SECRET
 
 They are not needed for PostgreSQL or Supabase Storage. If another future backend feature uses Cloudinary, put those variables on that backend service only, never in the frontend Vercel project.
 
-## Render deployment
+## Vercel deployment
 
-Deploy the API as a Render Web Service from the repository root:
+Deploy the repository to Vercel from the repository root:
 
 ```text
-Build command: npm install
-Start command: npm start
+Build command: npm run build
+Output directory: dist
 ```
 
-The production start command does not load `.env.local`. Add deployment variables in Render's Environment settings instead. Configure these on the Web Service:
+Add these deployment variables in Vercel's Project Settings > Environment Variables:
 
 ```text
 DATABASE_URL=...
@@ -72,22 +72,7 @@ SUPABASE_SERVICE_ROLE_KEY=...
 SUPABASE_STORAGE_BUCKET=uploads
 ```
 
-Deploy the Vite frontend to Vercel using the included `vercel.json`. It proxies `/api/*` and `/uploads/*` to `https://file-upload-service-ydue.onrender.com`, so Supabase and PostgreSQL variables belong only on the Render Web Service.
-
-Deploying the Vite frontend as a separate Render Static Site is also supported:
-
-```text
-Build command: npm install && npm run build
-Publish directory: dist
-```
-
-If the frontend is deployed to Render instead, set this frontend variable on the Render Static Site to the Render Web Service URL, without a trailing slash:
-
-```text
-VITE_API_BASE_URL=https://your-api-service.onrender.com
-```
-
-Redeploy both services after changing environment variables.
+Do not set `VITE_API_BASE_URL` for this deployment. The frontend calls the Vercel `/api/*` function on the same domain. Redeploy after changing environment variables.
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
