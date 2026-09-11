@@ -3,10 +3,19 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const bucketName = process.env.SUPABASE_STORAGE_BUCKET?.trim() || 'uploads';
+// 1. NO FALLBACK - crash if missing so we know
+const bucketName = process.env.SUPABASE_STORAGE_BUCKET?.trim();
+if (!bucketName) throw new Error("SUPABASE_STORAGE_BUCKET env var is missing");
+
 const usersFileName = 'private/users.json';
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+if (!supabaseUrl) throw new Error("NEXT_PUBLIC_SUPABASE_URL env var is missing");
+
+// 2. Must use SERVICE_ROLE_KEY for uploads, not ANON_KEY
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (!supabaseKey) throw new Error("SUPABASE_SERVICE_ROLE_KEY env var is missing");
+
 const uploadsDirectory = path.join(path.dirname(fileURLToPath(import.meta.url)), 'uploads');
 const isServerlessRuntime = Boolean(
   process.env.VERCEL ||
@@ -15,7 +24,7 @@ const isServerlessRuntime = Boolean(
 );
 
 export const hasSupabaseStorage = Boolean(supabaseUrl && supabaseKey);
-const supabase = hasSupabaseStorage ? createClient(supabaseUrl, supabaseKey) : null;
+const supabase = createClient(supabaseUrl, supabaseKey); // we already checked above
 
 function safeFileName(name) {
   return name.replace(/[^a-zA-Z0-9._-]/g, '_');
@@ -35,11 +44,10 @@ export async function uploadFile(file) {
 
   const fileName = `public/${Date.now()}-${crypto.randomUUID()}-${safeFileName(file.originalname || 'upload')}`;
 
-  if (!supabase) {
+  if (!hasSupabaseStorage) {
     if (isServerlessRuntime) {
-      throw new Error('Supabase Storage is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.');
+      throw new Error('Supabase Storage is not configured. Check env vars on Vercel.');
     }
-
     return uploadLocally(file, fileName);
   }
 
@@ -62,7 +70,7 @@ export async function uploadFile(file) {
     return { url: urlData.publicUrl, key: fileName };
   } catch (error) {
     if (isServerlessRuntime) {
-      throw error;
+      throw error; // show real error on Vercel instead of falling back
     }
 
     console.warn('Supabase file storage is unavailable locally. Saving the upload under server/uploads instead.');
@@ -71,10 +79,6 @@ export async function uploadFile(file) {
 }
 
 export async function getUsers() {
-  if (!supabase) {
-    throw new Error('Supabase Storage is not configured.');
-  }
-
   const { data, error } = await supabase.storage.from(bucketName).download(usersFileName);
   if (error) {
     if (error.message?.includes('not found') || error.statusCode === 404) {
@@ -88,10 +92,6 @@ export async function getUsers() {
 }
 
 export async function setUsers(users) {
-  if (!supabase) {
-    throw new Error('Supabase Storage is not configured.');
-  }
-
   const { error } = await supabase.storage.from(bucketName).upload(
     usersFileName,
     Buffer.from(JSON.stringify({ users })),
