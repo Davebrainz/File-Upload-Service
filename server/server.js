@@ -5,6 +5,8 @@ import cors from 'cors';
 import { fileURLToPath } from 'url';
 import {
   hasSupabaseAuth,
+  confirmSupabaseEmail,
+  resendSupabaseConfirmation,
   signInWithSupabase,
   signUpWithSupabase,
   updateSupabaseUsername,
@@ -46,6 +48,7 @@ export function createApp() {
         : 'Account created successfully.',
       user: result.user,
       session: result.session,
+      accessToken: result.session?.access_token || null,
       requiresEmailConfirmation: result.requiresEmailConfirmation,
     });
   }));
@@ -63,7 +66,44 @@ export function createApp() {
       return;
     }
 
-    res.json({ message: 'Signed in successfully.', user: result.user, session: result.session });
+    res.json({
+      message: 'Signed in successfully.',
+      user: result.user,
+      session: result.session,
+      accessToken: result.session?.access_token || null,
+    });
+  }));
+
+  app.post('/api/auth/resend-confirmation', asyncHandler(async (req, res) => {
+    const { email } = req.body || {};
+    if (!email) {
+      res.status(400).json({ error: 'Email is required.' });
+      return;
+    }
+
+    const result = await resendSupabaseConfirmation(email);
+    if (!result.success) {
+      res.status(400).json({ error: result.error });
+      return;
+    }
+
+    res.json({ message: 'A new confirmation email has been sent.' });
+  }));
+
+  app.post('/api/auth/confirm', asyncHandler(async (req, res) => {
+    const { tokenHash, type } = req.body || {};
+    if (!tokenHash) {
+      res.status(400).json({ error: 'The confirmation link is missing its token.' });
+      return;
+    }
+
+    const result = await confirmSupabaseEmail(tokenHash, type);
+    if (!result.success) {
+      res.status(400).json({ error: result.error });
+      return;
+    }
+
+    res.json({ message: 'Email confirmed. You can now sign in.', user: result.user });
   }));
 
   app.post('/api/auth/username', asyncHandler(async (req, res) => {

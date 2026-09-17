@@ -24,6 +24,7 @@ const initialAuthState = {
   accessToken: '',
   usernameSet: false,
   activeTab: 'upload',
+  canResendConfirmation: false,
 };
 
 function formatBytes(bytes) {
@@ -34,9 +35,15 @@ function formatBytes(bytes) {
   return `${parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 }
 
-export default function FileUploadService() {
+export default function FileUploadService({ confirmationMessage = '' }) {
   const [state, setState] = useState(initialState);
   const [authState, setAuthState] = useState(initialAuthState);
+
+  useEffect(() => {
+    if (confirmationMessage) {
+      setAuthState((prev) => ({...prev, mode: 'signin', message: confirmationMessage }));
+    }
+  }, [confirmationMessage]);
 
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -106,16 +113,18 @@ export default function FileUploadService() {
         password: authState.password,
         username: authState.username,
       });
+      const accessToken = result.payload.accessToken || result.payload.session?.access_token || '';
+      const signedIn = authState.mode === 'signin';
 
       setAuthState((prev) => ({
-     ...prev,
+        ...prev,
         loading: false,
         message: result.payload.message || 'Success.',
-        isAuthenticated: Boolean(result.payload.session),
+        isAuthenticated: signedIn,
         userEmail: result.payload.user?.email || authState.email,
-        accessToken: result.payload.session?.access_token || '',
+        accessToken,
         username: result.payload.user?.username || authState.username,
-        usernameSet: Boolean(result.payload.user?.username || authState.username),
+        usernameSet: Boolean(result.payload.user?.username),
       }));
 
       if (authState.mode === 'signup' || result.usedFallback) {
@@ -126,7 +135,28 @@ export default function FileUploadService() {
      ...prev,
         loading: false,
         message: error.message || 'Authentication failed.',
+        canResendConfirmation: authState.mode === 'signin' && /confirm your email/i.test(error.message || ''),
       }));
+    }
+  };
+
+  const handleResendConfirmation = async () => {
+    if (!authState.email) return;
+
+    setAuthState((prev) => ({...prev, loading: true, message: '' }));
+
+    try {
+      const response = await apiFetch('/api/auth/resend-confirmation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: authState.email }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.error || 'Could not resend the confirmation email.');
+
+      setAuthState((prev) => ({...prev, loading: false, message: payload.message, canResendConfirmation: false }));
+    } catch (error) {
+      setAuthState((prev) => ({...prev, loading: false, message: error.message || 'Could not resend the confirmation email.' }));
     }
   };
 
@@ -283,12 +313,19 @@ export default function FileUploadService() {
                 {authState.loading? 'Please wait...' : authState.mode === 'signup'? 'Sign up' : 'Sign in'}
               </button>
 
+              {authState.canResendConfirmation && (
+                <button type="button" className="secondary-btn" onClick={handleResendConfirmation} disabled={authState.loading}>
+                  Resend confirmation email
+                </button>
+              )}
+
               <button
                 type="button"
                 className="secondary-btn"
                 onClick={() => setAuthState((prev) => ({
                ...prev,
                   mode: prev.mode === 'signup'? 'signin' : 'signup',
+                  canResendConfirmation: false,
                   message: prev.mode === 'signup'? 'Use your saved account to sign in.' : 'Create a new account.'
                 }))}
               >

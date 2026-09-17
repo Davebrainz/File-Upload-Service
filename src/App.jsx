@@ -1,7 +1,8 @@
 import FileUploadService from './FileUploadService.jsx';
 import './App.css';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import heroAsset from './assets/hero.png';
+import { apiFetch } from './lib/apiClient.js';
 
 const features = [
   { number: '01', title: 'Upload without friction', text: 'Send JPG, PNG, WEBP, and PDF files up to 50MB from one focused workspace.' },
@@ -47,7 +48,66 @@ function LandingPage({ onEnter }) {
 }
 
 export default function App() {
-  const [showLanding, setShowLanding] = useState(true);
+  const [confirmation, setConfirmation] = useState(() => {
+    const query = new URLSearchParams(window.location.search);
+    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    const tokenHash = query.get('token_hash');
+    const type = query.get('type') || hash.get('type');
+    const error = query.get('error_description') || hash.get('error_description') || query.get('error') || hash.get('error');
 
-  return showLanding ? <LandingPage onEnter={() => setShowLanding(false)} /> : <FileUploadService />;
+    if (tokenHash || error || hash.get('access_token') || query.get('code')) {
+      return {
+        tokenHash,
+        type,
+        error,
+        pending: Boolean(tokenHash),
+        message: error
+          ? 'Email confirmation failed. Request a new confirmation email and try again.'
+          : tokenHash || hash.get('access_token') || query.get('code')
+            ? 'Confirming your email...'
+            : 'Email confirmed. You can now sign in.',
+      };
+    }
+
+    return null;
+  });
+
+  useEffect(() => {
+    if (!confirmation) return undefined;
+
+    const query = new URLSearchParams(window.location.search);
+    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    const clearCallback = () => window.history.replaceState({}, document.title, window.location.pathname);
+
+    if (confirmation.error) {
+      clearCallback();
+      return undefined;
+    }
+
+    if (confirmation.tokenHash) {
+      apiFetch('/api/auth/confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tokenHash: confirmation.tokenHash, type: confirmation.type }),
+      })
+        .then(async (response) => {
+          const payload = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(payload.error || 'Email confirmation failed.');
+          setConfirmation({ pending: false, message: payload.message });
+        })
+        .catch(() => setConfirmation({ pending: false, message: 'Email confirmation failed. Request a new confirmation email and try again.' }))
+        .finally(clearCallback);
+      return undefined;
+    }
+
+    if (hash.get('access_token') || query.get('code')) {
+      clearCallback();
+    }
+
+    return undefined;
+  }, [confirmation]);
+
+  const [showLanding, setShowLanding] = useState(!confirmation);
+
+  return showLanding ? <LandingPage onEnter={() => setShowLanding(false)} /> : <FileUploadService confirmationMessage={confirmation?.message || (confirmation?.pending ? 'Confirming your email...' : '')} />;
 }

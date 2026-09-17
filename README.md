@@ -21,6 +21,8 @@ SUPABASE_ANON_KEY=your-anon-key
 
 `SUPABASE_ANON_KEY` is safe to use in the browser, but the API reads it server-side. If Supabase email confirmation is enabled, sign-up returns a JSON message asking the user to confirm their email before signing in.
 
+Set the Supabase Authentication URL Configuration `Site URL` to the deployed app URL, and add local development URLs under `Redirect URLs`. This ensures confirmation links return to the app. The sign-in form can resend a confirmation email if the first one was missed.
+
 ## Supabase Storage setup
 
 Create a public Storage bucket named `uploads`, then add these variables to the Vercel project:

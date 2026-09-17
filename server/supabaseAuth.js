@@ -28,8 +28,14 @@ function formatUser(user) {
 
 function authError(error) {
   const message = error?.message || 'Authentication failed.';
-  if (/invalid login credentials/i.test(message)) {
+  if (/invalid login credentials|user not found|email not found/i.test(message)) {
     return 'The email or password is incorrect.';
+  }
+  if (/email not confirmed/i.test(message)) {
+    return 'Please confirm your email address before signing in.';
+  }
+  if (/rate limit|too many requests/i.test(message)) {
+    return 'Please wait a few minutes before requesting another confirmation email.';
   }
   if (/user already registered/i.test(message)) {
     return 'This email already has an account.';
@@ -63,6 +69,34 @@ export async function signInWithSupabase({ email, password }) {
     const { data, error } = await getClient().auth.signInWithPassword({
       email: email.trim().toLowerCase(),
       password,
+    });
+
+    if (error) return { success: false, error: authError(error) };
+    return { success: true, user: formatUser(data.user), session: data.session };
+  } catch (error) {
+    return { success: false, error: authError(error) };
+  }
+}
+
+export async function resendSupabaseConfirmation(email) {
+  try {
+    const { error } = await getClient().auth.resend({
+      type: 'signup',
+      email: email.trim().toLowerCase(),
+    });
+
+    if (error) return { success: false, error: authError(error) };
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: authError(error) };
+  }
+}
+
+export async function confirmSupabaseEmail(tokenHash, type = 'signup') {
+  try {
+    const { data, error } = await getClient().auth.verifyOtp({
+      token_hash: tokenHash,
+      type: type === 'email' ? 'email' : 'signup',
     });
 
     if (error) return { success: false, error: authError(error) };
