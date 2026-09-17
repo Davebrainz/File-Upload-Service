@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { createClient } from '@supabase/supabase-js';
 import { validateUpload } from './lib/fileValidation.js';
 import { submitAuthRequest } from './lib/authFlow.js';
 import { apiFetch } from './lib/apiClient.js';
@@ -233,22 +234,19 @@ export default function FileUploadService({ confirmationMessage = '' }) {
         }
 
         const uploadDetails = await uploadUrlResponse.json();
-        const directUploadForm = new FormData();
-        directUploadForm.append('cacheControl', '3600');
-        directUploadForm.append('', state.selectedFile);
-        const directUploadResponse = await fetch(uploadDetails.uploadUrl, {
-          method: 'POST',
-          headers: {
-            authorization: `Bearer ${uploadDetails.uploadAuthorization}`,
-            apikey: uploadDetails.uploadAuthorization,
-            'x-upsert': 'false',
-          },
-          body: directUploadForm,
+        const uploadClient = createClient(uploadDetails.supabaseUrl, uploadDetails.uploadAuthorization, {
+          auth: { persistSession: false, autoRefreshToken: false },
         });
+        const { error: uploadError } = await uploadClient.storage
+          .from(uploadDetails.bucket)
+          .uploadToSignedUrl(uploadDetails.uploadPath, uploadDetails.uploadToken, state.selectedFile, {
+            cacheControl: '3600',
+            upsert: false,
+            contentType: state.selectedFile.type || 'application/octet-stream',
+          });
 
-        if (!directUploadResponse.ok) {
-          const errorText = await directUploadResponse.text().catch(() => '');
-          throw new Error(errorText || 'The storage service could not complete the upload.');
+        if (uploadError) {
+          throw new Error(uploadError.message || 'The storage service could not complete the upload.');
         }
 
         result = { url: uploadDetails.url, id: uploadDetails.id };

@@ -95,6 +95,8 @@ export async function createUploadUrl(originalName, contentType) {
 
   return {
     signedUrl: data.signedUrl,
+    token: data.token,
+    path: data.path,
     publicUrl: urlData.publicUrl,
     key: fileName,
     contentType,

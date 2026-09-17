@@ -143,6 +143,10 @@ export function createApp() {
     const result = await createUploadUrl(name, type);
     res.json({
       uploadUrl: result.signedUrl,
+      uploadToken: result.token,
+      uploadPath: result.path,
+      bucket: process.env.SUPABASE_STORAGE_BUCKET,
+      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL,
       url: result.publicUrl,
       id: result.key,
       uploadAuthorization: result.uploadAuthorization,
