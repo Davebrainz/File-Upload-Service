@@ -8,25 +8,18 @@ API requests use the current site by default, so deployments with the included V
 VITE_API_BASE_URL=https://your-api.example.com
 ```
 
-The API runs as a Vercel Node function. It uses PostgreSQL for account data and Supabase Storage for uploaded files.
+The API runs as a Vercel Node function. It uses Supabase Auth for accounts and Supabase Storage for uploaded files.
 
-## PostgreSQL setup
+## Supabase Auth setup
 
-Create a PostgreSQL database and add its `DATABASE_URL` to the Vercel project. The server creates the `users` table automatically on its first request. No manual SQL migration is required.
-
-```text
-DATABASE_URL=postgresql://...
-```
-
-`DATABASE_URL` is a backend-only secret. Keep it out of frontend-exposed variables.
-
-If existing accounts must be preserved, run this once from the repository root after setting `DATABASE_URL` locally:
+In Supabase Dashboard, enable Email authentication under Authentication > Providers. Add these variables to the Vercel project:
 
 ```text
-npm run migrate:users
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-anon-key
 ```
 
-The migration copies the password hashes and usernames from `server/users.json`; it does not print passwords.
+`SUPABASE_ANON_KEY` is safe to use in the browser, but the API reads it server-side. If Supabase email confirmation is enabled, sign-up returns a JSON message asking the user to confirm their email before signing in.
 
 ## Supabase Storage setup
 
@@ -65,9 +58,8 @@ Output directory: dist
 Add these deployment variables in Vercel's Project Settings > Environment Variables:
 
 ```text
-DATABASE_URL=...
-NEXT_PUBLIC_SUPABASE_URL=...
-NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_URL=...
+SUPABASE_ANON_KEY=...
 SUPABASE_SERVICE_ROLE_KEY=...
 SUPABASE_STORAGE_BUCKET=uploads
 ```

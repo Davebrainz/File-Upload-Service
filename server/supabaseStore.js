@@ -3,18 +3,13 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// 1. NO FALLBACK - crash if missing so we know
 const bucketName = process.env.SUPABASE_STORAGE_BUCKET?.trim();
-if (!bucketName) throw new Error("SUPABASE_STORAGE_BUCKET env var is missing");
 
 const usersFileName = 'private/users.json';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-if (!supabaseUrl) throw new Error("NEXT_PUBLIC_SUPABASE_URL env var is missing");
 
-// 2. Must use SERVICE_ROLE_KEY for uploads, not ANON_KEY
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-if (!supabaseKey) throw new Error("SUPABASE_SERVICE_ROLE_KEY env var is missing");
 
 const uploadsDirectory = path.join(path.dirname(fileURLToPath(import.meta.url)), 'uploads');
 const isServerlessRuntime = Boolean(
@@ -23,8 +18,8 @@ const isServerlessRuntime = Boolean(
   process.env.AWS_LAMBDA_FUNCTION_NAME,
 );
 
-export const hasSupabaseStorage = Boolean(supabaseUrl && supabaseKey);
-const supabase = createClient(supabaseUrl, supabaseKey); // we already checked above
+export const hasSupabaseStorage = Boolean(supabaseUrl && supabaseKey && bucketName);
+const supabase = hasSupabaseStorage ? createClient(supabaseUrl, supabaseKey) : null;
 
 function safeFileName(name) {
   return name.replace(/[^a-zA-Z0-9._-]/g, '_');

@@ -3,7 +3,12 @@ import multer from 'multer';
 import path from 'path';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
-import { authenticateUser, getAuthStatus, saveUser, updateUserUsername } from './authStore.js';
+import {
+  hasSupabaseAuth,
+  signInWithSupabase,
+  signUpWithSupabase,
+  updateSupabaseUsername,
+} from './supabaseAuth.js';
 import { uploadFile } from './supabaseStore.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -19,7 +24,7 @@ export function createApp() {
   const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
 
   app.get('/api/auth/status', asyncHandler(async (req, res) => {
-    res.json(await getAuthStatus());
+    res.json({ hasAccount: false, configured: hasSupabaseAuth });
   }));
 
   app.post('/api/auth/signup', asyncHandler(async (req, res) => {
@@ -29,42 +34,49 @@ export function createApp() {
       return;
     }
 
-    const result = await saveUser(email, password, username);
+    const result = await signUpWithSupabase({ email, password, username });
     if (!result.success) {
-      res.status(409).json({ error: result.error });
+      res.status(result.error === 'This email already has an account.' ? 409 : 400).json({ error: result.error });
       return;
     }
 
-    res.status(201).json({ message: 'Account created successfully.', user: { email, username: username || '' } });
+    res.status(201).json({
+      message: result.requiresEmailConfirmation
+        ? 'Account created. Check your email to confirm it before signing in.'
+        : 'Account created successfully.',
+      user: result.user,
+      session: result.session,
+      requiresEmailConfirmation: result.requiresEmailConfirmation,
+    });
   }));
 
   app.post('/api/auth/signin', asyncHandler(async (req, res) => {
-    const { email, username, password } = req.body || {};
-    const identifier = email || username;
-    if (!identifier || !password) {
-      res.status(400).json({ error: 'Email or username and password are required.' });
+    const { email, password } = req.body || {};
+    if (!email || !password) {
+      res.status(400).json({ error: 'Email and password are required.' });
       return;
     }
 
-    const result = await authenticateUser(identifier, password);
+    const result = await signInWithSupabase({ email, password });
     if (!result.success) {
       res.status(401).json({ error: result.error });
       return;
     }
 
-    res.json({ message: 'Signed in successfully.', user: result.user });
+    res.json({ message: 'Signed in successfully.', user: result.user, session: result.session });
   }));
 
   app.post('/api/auth/username', asyncHandler(async (req, res) => {
-    const { email, username } = req.body || {};
-    if (!email || !username) {
-      res.status(400).json({ error: 'Email and username are required.' });
+    const { username } = req.body || {};
+    const accessToken = req.headers.authorization?.replace(/^Bearer\s+/i, '');
+    if (!username || !accessToken) {
+      res.status(400).json({ error: 'A signed-in session and username are required.' });
       return;
     }
 
-    const result = await updateUserUsername(email, username);
+    const result = await updateSupabaseUsername(accessToken, username);
     if (!result.success) {
-      res.status(404).json({ error: result.error });
+      res.status(401).json({ error: result.error });
       return;
     }
 
@@ -91,9 +103,10 @@ export function createApp() {
 
     if (
       error.message?.includes('Persistent account storage') ||
-      error.message?.includes('Supabase Storage is not configured')
+      error.message?.includes('Supabase Storage is not configured') ||
+      error.message?.includes('Supabase Auth is not configured')
     ) {
-      res.status(503).json({ error: 'Account storage is not configured. Add Supabase Storage credentials in Vercel.' });
+      res.status(503).json({ error: error.message });
       return;
     }
 

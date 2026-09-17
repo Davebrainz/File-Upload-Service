@@ -21,6 +21,7 @@ const initialAuthState = {
   message: '',
   isAuthenticated: false,
   userEmail: '',
+  accessToken: '',
   usernameSet: false,
   activeTab: 'upload',
 };
@@ -92,7 +93,7 @@ export default function FileUploadService() {
     event.preventDefault();
 
     if (!authState.email ||!authState.password) {
-      setAuthState((prev) => ({...prev, message: 'Please enter both email/username and password.' }));
+      setAuthState((prev) => ({...prev, message: 'Please enter both email and password.' }));
       return;
     }
 
@@ -110,8 +111,9 @@ export default function FileUploadService() {
      ...prev,
         loading: false,
         message: result.payload.message || 'Success.',
-        isAuthenticated: true,
-        userEmail: authState.email,
+        isAuthenticated: Boolean(result.payload.session),
+        userEmail: result.payload.user?.email || authState.email,
+        accessToken: result.payload.session?.access_token || '',
         username: result.payload.user?.username || authState.username,
         usernameSet: Boolean(result.payload.user?.username || authState.username),
       }));
@@ -141,8 +143,11 @@ export default function FileUploadService() {
     try {
       const response = await apiFetch('/api/auth/username', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: authState.userEmail, username: authState.username.trim() }),
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authState.accessToken}`,
+        },
+        body: JSON.stringify({ username: authState.username.trim() }),
       });
 
       const payload = await response.json().catch(() => ({}));
@@ -252,15 +257,15 @@ export default function FileUploadService() {
                   />
                 </>
               ) : (
-                // SIGN IN: Only Email/Username + Password
+                // SIGN IN: Supabase Auth signs in with email + password.
                 <>
-                  <label className="field-label" htmlFor="email">Email or Username</label>
+                  <label className="field-label" htmlFor="email">Email</label>
                   <input
                     id="email"
                     type="text"
                     value={authState.email}
                     onChange={(event) => setAuthState((prev) => ({...prev, email: event.target.value }))}
-                    placeholder="Enter Email or Username"
+                    placeholder="you@example.com"
                   />
 
                   <label className="field-label" htmlFor="password">Password</label>
