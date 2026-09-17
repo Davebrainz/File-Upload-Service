@@ -10,6 +10,7 @@ const usersFileName = 'private/users.json';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
 
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 const uploadsDirectory = path.join(path.dirname(fileURLToPath(import.meta.url)), 'uploads');
 const isServerlessRuntime = Boolean(
@@ -77,6 +78,9 @@ export async function createUploadUrl(originalName, contentType) {
   if (!hasSupabaseStorage) {
     throw new Error('Supabase Storage is not configured. Check env vars on Vercel.');
   }
+  if (!supabaseAnonKey) {
+    throw new Error('SUPABASE_ANON_KEY is not configured for direct uploads on Vercel.');
+  }
 
   const fileName = `public/${Date.now()}-${crypto.randomUUID()}-${safeFileName(originalName || 'upload')}`;
   const { data, error } = await supabase.storage.from(bucketName).createSignedUploadUrl(fileName);
@@ -89,7 +93,13 @@ export async function createUploadUrl(originalName, contentType) {
     throw new Error('Supabase Storage returned an invalid public URL.');
   }
 
-  return { signedUrl: data.signedUrl, publicUrl: urlData.publicUrl, key: fileName, contentType };
+  return {
+    signedUrl: data.signedUrl,
+    publicUrl: urlData.publicUrl,
+    key: fileName,
+    contentType,
+    uploadAuthorization: supabaseAnonKey,
+  };
 }
 
 export async function getUsers() {

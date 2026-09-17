@@ -141,7 +141,12 @@ export function createApp() {
     }
 
     const result = await createUploadUrl(name, type);
-    res.json({ uploadUrl: result.signedUrl, url: result.publicUrl, id: result.key });
+    res.json({
+      uploadUrl: result.signedUrl,
+      url: result.publicUrl,
+      id: result.key,
+      uploadAuthorization: result.uploadAuthorization,
+    });
   }));
 
   app.use((error, req, res, next) => {

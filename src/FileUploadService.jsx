@@ -238,7 +238,11 @@ export default function FileUploadService({ confirmationMessage = '' }) {
         directUploadForm.append('', state.selectedFile);
         const directUploadResponse = await fetch(uploadDetails.uploadUrl, {
           method: 'POST',
-          headers: { 'x-upsert': 'false' },
+          headers: {
+            authorization: `Bearer ${uploadDetails.uploadAuthorization}`,
+            apikey: uploadDetails.uploadAuthorization,
+            'x-upsert': 'false',
+          },
           body: directUploadForm,
         });
 
