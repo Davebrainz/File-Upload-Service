@@ -12,5 +12,11 @@
         "distDir": "dist"
       }
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/index.js"
+    }
   ]
 }
