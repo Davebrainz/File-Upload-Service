@@ -11,7 +11,7 @@ import {
   signUpWithSupabase,
   updateSupabaseUsername,
 } from './supabaseAuth.js';
-import { uploadFile } from './supabaseStore.js';
+import { createUploadUrl, uploadFile } from './supabaseStore.js';
 
 const __filename = fileURLToPath(import.meta.url);
 
@@ -23,7 +23,7 @@ export function createApp() {
   app.use('/uploads', express.static(path.join(path.dirname(__filename), 'uploads')));
   const asyncHandler = (handler) => (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
 
-  const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
+  const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 500 * 1024 * 1024 } });
 
   app.get('/api/auth/status', asyncHandler(async (req, res) => {
     res.json({ hasAccount: false, configured: hasSupabaseAuth });
@@ -133,11 +133,22 @@ export function createApp() {
     res.json({ url: result.url, id: result.key });
   }));
 
+  app.post('/api/upload-url', asyncHandler(async (req, res) => {
+    const { name, type } = req.body || {};
+    if (!name) {
+      res.status(400).json({ error: 'A file name is required.' });
+      return;
+    }
+
+    const result = await createUploadUrl(name, type);
+    res.json({ uploadUrl: result.signedUrl, url: result.publicUrl, id: result.key });
+  }));
+
   app.use((error, req, res, next) => {
     void next;
     console.error(error);
     if (error.code === 'LIMIT_FILE_SIZE') {
-      res.status(413).json({ error: 'File size exceeds 50MB limit.' });
+      res.status(413).json({ error: 'File size exceeds 500MB limit.' });
       return;
     }
 

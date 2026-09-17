@@ -5,7 +5,7 @@ import heroAsset from './assets/hero.png';
 import { apiFetch } from './lib/apiClient.js';
 
 const features = [
-  { number: '01', title: 'Upload without friction', text: 'Send JPG, PNG, WEBP, and PDF files up to 50MB from one focused workspace.' },
+  { number: '01', title: 'Upload without friction', text: 'Send JPG, PNG, WEBP, and PDF files up to 500MB from one focused workspace.' },
   { number: '02', title: 'Get a shareable link', text: 'Every upload becomes a clean link you can share with your team or anywhere online.' },
   { number: '03', title: 'Preview before you share', text: 'View images and PDFs directly in the app so you always know what your recipients will see.' },
   { number: '04', title: 'Stay in control', text: 'Open, download, or copy your file link in one click whenever you need it again.' },
@@ -26,7 +26,7 @@ function LandingPage({ onEnter }) {
           <h1>Put your files<br /><em>in motion.</em></h1>
           <p className="hero-intro">A fast, dependable place to upload files, create reshareable links, and keep every handoff moving.</p>
           <div className="hero-actions"><button type="button" className="landing-button primary" onClick={onEnter}>Get started <span aria-hidden="true">↗</span></button><button type="button" className="landing-button text-button" onClick={onEnter}>Sign in to your account <span aria-hidden="true">→</span></button></div>
-          <div className="hero-proof"><span className="proof-dot" />No complicated setup <span className="proof-divider">·</span> Files up to 50MB</div>
+          <div className="hero-proof"><span className="proof-dot" />No complicated setup <span className="proof-divider">·</span> Files up to 500MB</div>
         </div>
         <div className="hero-visual" aria-label="File upload preview">
           <div className="visual-glow" /><div className="visual-topline"><span>YOUR FILES</span><span className="live-status"><i /> Ready to share</span></div>

@@ -210,19 +210,43 @@ export default function FileUploadService({ confirmationMessage = '' }) {
     setState((prev) => ({...prev, uploadState: 'uploading', message: 'Uploading file...' }));
 
     try {
-      const formData = new FormData();
-      formData.append('file', state.selectedFile);
-      const uploadResponse = await apiFetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
+      const isLocalhost = ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname);
+      let result;
 
-      if (!uploadResponse.ok) {
+      if (isLocalhost) {
+        const formData = new FormData();
+        formData.append('file', state.selectedFile);
+        const uploadResponse = await apiFetch('/api/upload', { method: 'POST', body: formData });
         const payload = await uploadResponse.json().catch(() => ({}));
-        throw new Error(payload.error || 'Upload failed.');
+        if (!uploadResponse.ok) throw new Error(payload.error || 'Upload failed.');
+        result = payload;
+      } else {
+        const uploadUrlResponse = await apiFetch('/api/upload-url', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: state.selectedFile.name, type: state.selectedFile.type }),
+        });
+
+        if (!uploadUrlResponse.ok) {
+          const payload = await uploadUrlResponse.json().catch(() => ({}));
+          throw new Error(payload.error || 'Could not prepare the upload.');
+        }
+
+        const uploadDetails = await uploadUrlResponse.json();
+        const directUploadForm = new FormData();
+        directUploadForm.append('', state.selectedFile);
+        const directUploadResponse = await fetch(uploadDetails.uploadUrl, {
+          method: 'POST',
+          body: directUploadForm,
+        });
+
+        if (!directUploadResponse.ok) {
+          throw new Error('The storage service could not complete the upload.');
+        }
+
+        result = { url: uploadDetails.url, id: uploadDetails.id };
       }
 
-      const result = await uploadResponse.json();
       const shareUrl = result.url;
 
       setState((prev) => ({
@@ -394,7 +418,7 @@ export default function FileUploadService({ confirmationMessage = '' }) {
                 <>
                   <label className="upload-box" htmlFor="file-input">
                     <span className="upload-title">Upload File</span>
-                    <span className="upload-subtitle">Choose a JPG, PNG, WEBP, or PDF up to 50MB</span>
+                    <span className="upload-subtitle">Choose a JPG, PNG, WEBP, or PDF up to 500MB</span>
                     <input id="file-input" type="file" onChange={onFileSelect} accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf" />
                   </label>
 

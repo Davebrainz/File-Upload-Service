@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { validateUpload, buildShareUrl, isExpired } from '../src/lib/fileValidation.js';
 
-test('allows supported image and PDF files up to 50MB', () => {
+test('allows supported image and PDF files up to 500MB', () => {
   const file = {
     originalname: 'photo.png',
     size: 2 * 1024 * 1024,
@@ -21,7 +21,7 @@ test('rejects unsupported files and oversized uploads', () => {
 
   const oversized = {
     originalname: 'large.pdf',
-    size: 60 * 1024 * 1024,
+    size: 600 * 1024 * 1024,
     mimetype: 'application/pdf',
   };
 
@@ -32,7 +32,7 @@ test('rejects unsupported files and oversized uploads', () => {
 
   assert.deepEqual(validateUpload(oversized), {
     valid: false,
-    error: 'File size exceeds 50MB limit.',
+    error: 'File size exceeds 500MB limit.',
   });
 });
 

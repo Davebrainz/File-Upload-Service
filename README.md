@@ -34,7 +34,7 @@ SUPABASE_SERVICE_ROLE_KEY=...
 SUPABASE_STORAGE_BUCKET=uploads
 ```
 
-`SUPABASE_SERVICE_ROLE_KEY` is server-only and should be configured only in Vercel's server environment. Make the bucket public so shared links open directly. The server accepts files up to 50 MB, and the frontend validates supported file types and the same size limit.
+`SUPABASE_SERVICE_ROLE_KEY` is server-only and should be configured only in Vercel's server environment. Make the bucket public so shared links open directly. Production uploads use a signed Supabase Storage URL, so the file does not pass through Vercel's serverless request limit. The frontend accepts files up to 500 MB, subject to your Supabase Storage plan limits.
 
 ## Cloudinary
 

@@ -73,6 +73,25 @@ export async function uploadFile(file) {
   }
 }
 
+export async function createUploadUrl(originalName, contentType) {
+  if (!hasSupabaseStorage) {
+    throw new Error('Supabase Storage is not configured. Check env vars on Vercel.');
+  }
+
+  const fileName = `public/${Date.now()}-${crypto.randomUUID()}-${safeFileName(originalName || 'upload')}`;
+  const { data, error } = await supabase.storage.from(bucketName).createSignedUploadUrl(fileName);
+  if (error || !data?.signedUrl) {
+    throw error || new Error('Supabase Storage could not create an upload URL.');
+  }
+
+  const { data: urlData } = supabase.storage.from(bucketName).getPublicUrl(fileName);
+  if (!urlData?.publicUrl) {
+    throw new Error('Supabase Storage returned an invalid public URL.');
+  }
+
+  return { signedUrl: data.signedUrl, publicUrl: urlData.publicUrl, key: fileName, contentType };
+}
+
 export async function getUsers() {
   const { data, error } = await supabase.storage.from(bucketName).download(usersFileName);
   if (error) {

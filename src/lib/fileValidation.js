@@ -6,7 +6,7 @@ const allowedMimeTypes = new Set([
 ]);
 
 const allowedExtensions = new Set(['.jpg', '.jpeg', '.png', '.webp', '.pdf']);
-const maxFileSize = 50 * 1024 * 1024;
+export const maxFileSize = 500 * 1024 * 1024;
 
 export function validateUpload(file) {
   if (!file) {
@@ -30,7 +30,7 @@ export function validateUpload(file) {
   }
 
   if (file.size > maxFileSize) {
-    return { valid: false, error: 'File size exceeds 50MB limit.' };
+    return { valid: false, error: 'File size exceeds 500MB limit.' };
   }
 
   return { valid: true };
