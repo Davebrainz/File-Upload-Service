@@ -234,14 +234,17 @@ export default function FileUploadService({ confirmationMessage = '' }) {
 
         const uploadDetails = await uploadUrlResponse.json();
         const directUploadForm = new FormData();
+        directUploadForm.append('cacheControl', '3600');
         directUploadForm.append('', state.selectedFile);
         const directUploadResponse = await fetch(uploadDetails.uploadUrl, {
           method: 'POST',
+          headers: { 'x-upsert': 'false' },
           body: directUploadForm,
         });
 
         if (!directUploadResponse.ok) {
-          throw new Error('The storage service could not complete the upload.');
+          const errorText = await directUploadResponse.text().catch(() => '');
+          throw new Error(errorText || 'The storage service could not complete the upload.');
         }
 
         result = { url: uploadDetails.url, id: uploadDetails.id };
