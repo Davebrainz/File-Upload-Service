@@ -423,7 +423,7 @@ export default function FileUploadService({ confirmationMessage = '' }) {
                 <>
                   <label className="upload-box" htmlFor="file-input">
                     <span className="upload-title">Upload File</span>
-                    <span className="upload-subtitle">Choose a JPG, PNG, WEBP, or PDF up to 500MB</span>
+                    <span className="upload-subtitle">Choose a JPG, PNG, WEBP, or PDF up to 50MB</span>
                     <input id="file-input" type="file" onChange={onFileSelect} accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf" />
                   </label>
 
